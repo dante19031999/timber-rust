@@ -200,13 +200,13 @@ pub enum ConfigEntry {
 /// - **`url`**: (String) The full endpoint for Loki (e.g., `https://loki.example.com`).
 ///
 /// ### Optional Fields
-/// - **`app`**: (String) Application label. Default: [`LOKI_DEFAULT_APP`][`crate::service::LOKI_DEFAULT_APP`].
-/// - **`job`**: (String) Job label. Default: [`LOKI_DEFAULT_JOB`][`crate::service::LOKI_DEFAULT_JOB`].
-/// - **`env`**: (String) Environment label (e.g., `"prod"`, `"dev"`). Default: [`LOKI_DEFAULT_ENV`][`crate::service::LOKI_DEFAULT_ENV`].
-/// - **`max_retries`**: (Integer) Number of retry attempts for failed requests. Default: [`LOKI_DEFAULT_RETRIES`][`crate::service::LOKI_DEFAULT_RETRIES`].
-/// - **`workers`**: (Integer) Number of concurrent background workers. Default: [`LOKI_DEFAULT_WORKERS`][`crate::service::LOKI_DEFAULT_WORKERS`].
-/// - **`connection_timeout`**: (Duration) Timeout for the HTTP connection. Default: [`LOKI_DEFAULT_CONNECTION_TIMEOUT`][`crate::service::LOKI_DEFAULT_CONNECTION_TIMEOUT`].
-/// - **`request_timeout`**:(Duration) Timeout for the HTTP request response. Default: [`LOKI_DEFAULT_REQUEST_TIMEOUT`][`crate::service::LOKI_DEFAULT_REQUEST_TIMEOUT`].
+/// - **`app`**: (String) Application label. Default: [`LOKI_DEFAULT_APP`][`crate::service::loki::LOKI_DEFAULT_APP`].
+/// - **`job`**: (String) Job label. Default: [`LOKI_DEFAULT_JOB`][`crate::service::loki::LOKI_DEFAULT_JOB`].
+/// - **`env`**: (String) Environment label (e.g., `"prod"`, `"dev"`). Default: [`LOKI_DEFAULT_ENV`][`crate::service::loki::LOKI_DEFAULT_ENV`].
+/// - **`max_retries`**: (Integer) Number of retry attempts for failed requests. Default: [`LOKI_DEFAULT_RETRIES`][`crate::service::loki::LOKI_DEFAULT_RETRIES`].
+/// - **`workers`**: (Integer) Number of concurrent background workers. Default: [`LOKI_DEFAULT_WORKERS`][`crate::service::loki::LOKI_DEFAULT_WORKERS`].
+/// - **`connection_timeout`**: (Duration) Timeout for the HTTP connection. Default: [`LOKI_DEFAULT_CONNECTION_TIMEOUT`][`crate::service::loki::LOKI_DEFAULT_CONNECTION_TIMEOUT`].
+/// - **`request_timeout`**:(Duration) Timeout for the HTTP request response. Default: [`LOKI_DEFAULT_REQUEST_TIMEOUT`][`crate::service::loki::LOKI_DEFAULT_REQUEST_TIMEOUT`].
 ///
 /// ### Authentication (Choose one)
 /// - **`basic_auth`**: (Object) `{ "username": "...", "password": "..." }`. Can be null or absent. See [`BasicAuth`][`crate::service::BasicAuth`].

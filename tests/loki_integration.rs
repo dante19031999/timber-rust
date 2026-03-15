@@ -7,9 +7,9 @@
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 use timber_rust::service::{
-    BasicAuth, DefaultLokiService, LokiConfig, LokiData, LokiLogger, LokiMessage, LokiService,
+    BasicAuth, DefaultLokiService, LokiConfig, LokiData,  LokiMessage, LokiService,
 };
-use timber_rust::{LoggerImpl, LoggerStatus, MessageFactory};
+use timber_rust::{LoggerImpl, LoggerStatus, LokiLogger, MessageFactory};
 
 #[test]
 fn test_loki_config_full_builder() {
@@ -46,7 +46,7 @@ fn test_loki_config_full_builder() {
     assert_eq!(config.get_max_retries(), 5);
     assert_eq!(config.get_workers(), 4);
 
-    config = LokiConfig::new_with_labels("http://loki:3100", "my-service", "backend", "staging");
+    config = LokiConfig::with_labels("http://loki:3100", "my-service", "backend", "staging");
 
     // Verificaciones
     assert_eq!(config.get_url(), "http://loki:3100/");

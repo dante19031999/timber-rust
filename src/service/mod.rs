@@ -5,13 +5,12 @@ mod error;
 mod fallback;
 mod formatter;
 mod fv1hash;
-#[cfg(feature = "loki")]
-mod loki;
-mod loki_config;
 pub(crate) mod serde;
 mod serror;
 mod service;
 pub mod write;
+#[cfg(feature = "loki")]
+pub mod loki;
 
 pub use error::*;
 pub use fallback::*;
@@ -19,10 +18,7 @@ pub use formatter::*;
 pub(crate) use fv1hash::*;
 #[cfg(feature = "loki")]
 #[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
-pub use loki::*;
-#[cfg(feature = "loki")]
-#[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
-pub use loki_config::*;
+
 #[cfg(feature = "serde_tools")]
 #[cfg_attr(docsrs, doc(cfg(feature = "serde_tools")))]
 pub use serde::BasicAuth;
@@ -51,5 +47,11 @@ pub use crate::service::write::DefaultBoxedFmtService as DefaultBoxedFmtWriteSer
 pub use crate::service::write::ArcedFmtService as ArcedFmtWriteService;
 pub use crate::service::write::DefaultArcedFmtService as DefaultArcedFmtWriteService;
 
+pub use crate::service::loki::Data as LokiData;
+pub use crate::service::loki::Message as LokiMessage;
+pub use crate::service::loki::Config as LokiConfig;
+pub use crate::service::loki::Service as LokiService;
+pub use crate::service::loki::DefaultService as DefaultLokiService;
+pub use crate::service::loki::Fallback as LokiFallback;
 
 

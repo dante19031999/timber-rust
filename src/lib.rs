@@ -23,17 +23,19 @@ pub use config::*;
 pub use factory::*;
 pub use manager::*;
 pub use message::*;
-pub use service::Service;
 pub use service::Fallback;
+pub use service::Service;
 
-pub use logger::Level as LogLevel;
-pub use logger::Status as LoggerStatus;
-pub use logger::LoggerImpl as LoggerImpl;
-pub use logger::Logger as Logger;
-pub use logger::Queued as QueuedLogger;
 pub use logger::Direct as DirectLogger;
+pub use logger::Level as LogLevel;
+pub use logger::Logger;
+pub use logger::LoggerImpl;
+#[cfg(feature = "loki")]
+#[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
+pub use logger::Loki as LokiLogger;
+pub use logger::Queued as QueuedLogger;
 pub use logger::Silent as SilentLogger;
+pub use logger::Status as LoggerStatus;
 
 #[cfg(test)]
-mod tests {
-}
+mod tests {}

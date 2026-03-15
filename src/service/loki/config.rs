@@ -34,7 +34,8 @@ pub const LOKI_DEFAULT_REQUEST_TIMEOUT: Duration = Duration::from_secs(2);
 /// ### Example
 /// ```rust
 /// # use timber_rust::Logger;
-/// use timber_rust::service::{LokiConfig, LokiLogger};
+/// # use timber_rust::service::{LokiConfig};
+/// # use timber_rust::LokiLogger;
 /// let config = LokiConfig::new("[https://logs-prod-us-central1.grafana.net/loki/api/v1/push](https://logs-prod-us-central1.grafana.net/loki/api/v1/push)")
 ///     .job("api-server")
 ///     .app("billing-v2")
@@ -46,7 +47,7 @@ pub const LOKI_DEFAULT_REQUEST_TIMEOUT: Duration = Duration::from_secs(2);
 /// let logger = Logger::new(logger);
 /// ```
 #[derive(Clone)]
-pub struct LokiConfig {
+pub struct Config {
     pub(crate) url: String,
     pub(crate) app: String,
     pub(crate) job: String,
@@ -81,8 +82,8 @@ pub struct LokiConfig {
 /// ### Logger data:
 /// - `max_retries`: Maximum number of retries (only used in the [`LoggerFactory`][`crate::LoggerFactory`])
 /// - `workers`: Number of workers to use (only used in the [`LoggerFactory`][`crate::LoggerFactory`])
-impl LokiConfig {
-    /// Creates a new [`LokiConfig`] with default settings.
+impl Config {
+    /// Creates a new [`LokiConfig`][`Config`] with default settings.
     ///
     /// # Parameters
     /// - `url`: Base url for loki.
@@ -95,30 +96,19 @@ impl LokiConfig {
     /// - **Connection timeout**: [`LOKI_DEFAULT_CONNECTION_TIMEOUT`]
     /// - **Request timeout**: [`LOKI_DEFAULT_REQUEST_TIMEOUT`]
     /// - **Maximum retries**: [`LOKI_DEFAULT_RETRIES`]
-    pub fn new<S>(url: S) -> LokiConfig
+    pub fn new<S>(url: S) -> Self
     where
         S: Into<String>,
     {
-        let mut url = url.into();
-        if !url.ends_with('/') {
-            url.push('/');
-        }
-
-        LokiConfig {
+        Self::with_labels(
             url,
-            app: LOKI_DEFAULT_APP.to_string(),
-            job: LOKI_DEFAULT_JOB.to_string(),
-            env: LOKI_DEFAULT_ENV.to_string(),
-            basic_auth: None,
-            bearer_auth: None,
-            connection_timeout: LOKI_DEFAULT_CONNECTION_TIMEOUT,
-            request_timeout: LOKI_DEFAULT_REQUEST_TIMEOUT,
-            max_retries: LOKI_DEFAULT_RETRIES,
-            workers: LOKI_DEFAULT_WORKERS,
-        }
+            LOKI_DEFAULT_APP.to_string(),
+            LOKI_DEFAULT_JOB.to_string(),
+            LOKI_DEFAULT_ENV.to_string(),
+        )
     }
 
-    /// Creates a new [`LokiConfig`] with customized labels default settings.
+    /// Creates a new [`LokiConfig`][`Config`] with customized labels default settings.
     ///
     /// # Parameters
     /// - `url`: Base url for loki.
@@ -132,7 +122,7 @@ impl LokiConfig {
     /// - **Connection timeout**: [`LOKI_DEFAULT_CONNECTION_TIMEOUT`]
     /// - **Request timeout**: [`LOKI_DEFAULT_REQUEST_TIMEOUT`]
     /// - **Maximum retries**: [`LOKI_DEFAULT_RETRIES`]
-    pub fn new_with_labels<S1, S2, S3, S4>(url: S1, app: S3, job: S2, env: S4) -> LokiConfig
+    pub fn with_labels<S1, S2, S3, S4>(url: S1, app: S3, job: S2, env: S4) -> Self
     where
         S1: Into<String>,
         S2: Into<String>,
@@ -144,7 +134,7 @@ impl LokiConfig {
             url.push('/');
         }
 
-        LokiConfig {
+        Self {
             url,
             app: app.into(),
             job: job.into(),
@@ -209,7 +199,7 @@ impl LokiConfig {
     }
 
     /// Sets the destination Loki base URL (e.g., `http://localhost:3100`).
-    pub fn url<S: Into<String>>(mut self, url: S) -> LokiConfig {
+    pub fn url<S: Into<String>>(mut self, url: S) -> Self {
         let mut url = url.into();
         if !url.ends_with('/') {
             url.push('/');
@@ -219,31 +209,31 @@ impl LokiConfig {
     }
 
     /// Sets the `app` label to identify this specific application instance.
-    pub fn app<S: Into<String>>(mut self, app: S) -> LokiConfig {
+    pub fn app<S: Into<String>>(mut self, app: S) -> Self {
         self.app = app.into();
         self
     }
 
     /// Sets the `job` label used by Loki for indexing.
-    pub fn job<S: Into<String>>(mut self, job: S) -> LokiConfig {
+    pub fn job<S: Into<String>>(mut self, job: S) -> Self {
         self.job = job.into();
         self
     }
 
     /// Sets the `env` label used by Loki for indexing.
-    pub fn env<S: Into<String>>(mut self, env: S) -> LokiConfig {
+    pub fn env<S: Into<String>>(mut self, env: S) -> Self {
         self.env = env.into();
         self
     }
 
     /// Configures the number of parallel workers that should process logs for this service.
-    pub fn workers(mut self, workers: usize) -> LokiConfig {
+    pub fn workers(mut self, workers: usize) -> Self {
         self.workers = workers;
         self
     }
 
     /// Configures the number of maximum retries that the process should be attempted.
-    pub fn max_retries(mut self, max_retries: usize) -> LokiConfig {
+    pub fn max_retries(mut self, max_retries: usize) -> Self {
         self.max_retries = max_retries;
         self
     }
@@ -252,7 +242,7 @@ impl LokiConfig {
     ///
     /// # Arguments
     /// * `basic_auth` [Basic auth][`BasicAuth`] object representing the login credentials.
-    pub fn basic_auth<BA>(mut self, basic_auth: Option<BA>) -> LokiConfig
+    pub fn basic_auth<BA>(mut self, basic_auth: Option<BA>) -> Self
     where
         BA: Into<BasicAuth>,
     {
@@ -261,7 +251,7 @@ impl LokiConfig {
     }
 
     /// Enables Bearer Token authentication (e.g., JWT).
-    pub fn bearer_auth<S>(mut self, token: Option<S>) -> LokiConfig
+    pub fn bearer_auth<S>(mut self, token: Option<S>) -> Self
     where
         S: Into<String>,
     {
@@ -270,19 +260,19 @@ impl LokiConfig {
     }
 
     /// Sets the connection timeout to try to log in loki.
-    pub fn connection_timeout<D: Into<Duration>>(mut self, connection_timeout: D) -> LokiConfig {
+    pub fn connection_timeout<D: Into<Duration>>(mut self, connection_timeout: D) -> Self {
         self.connection_timeout = connection_timeout.into();
         self
     }
 
     /// Sets the request timeout to try to log in loki.
-    pub fn request_timeout<S: Into<Duration>>(mut self, request_timeout: S) -> LokiConfig {
+    pub fn request_timeout<S: Into<Duration>>(mut self, request_timeout: S) -> Self {
         self.request_timeout = request_timeout.into();
         self
     }
 }
 
-impl std::fmt::Debug for LokiConfig {
+impl std::fmt::Debug for Config {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut d = f.debug_struct("LokiConfig");
 
@@ -318,7 +308,7 @@ impl std::fmt::Debug for LokiConfig {
     }
 }
 
-impl Serialize for LokiConfig {
+impl Serialize for Config {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -358,7 +348,7 @@ impl Serialize for LokiConfig {
     }
 }
 
-impl<'de> Deserialize<'de> for LokiConfig {
+impl<'de> Deserialize<'de> for Config {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
@@ -384,7 +374,7 @@ impl<'de> Deserialize<'de> for LokiConfig {
             data.url.push('/');
         }
 
-        Ok(LokiConfig {
+        Ok(Config {
             url: data.url,
             app: data.app.unwrap_or(LOKI_DEFAULT_APP.to_string()),
             job: data.job.unwrap_or(LOKI_DEFAULT_JOB.to_string()),
