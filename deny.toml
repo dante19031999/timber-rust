@@ -1,0 +1,19 @@
+[licenses]
+
+# 2. Tu Lista Blanca: Solo estas licencias pueden entrar
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Unicode-3.0",
+    "ISC",              # Muy común en librerías pequeñas (equivalente a MIT)
+    "BSD-3-Clause",     # Segura y común
+    "BSD-2-Clause",     # Segura y común
+    "Zlib",             # Necesaria para crates de compresión
+    "Unicode-DFS-2016", # Necesaria para crates de texto/chrono
+    "OpenSSL",          # Por si acaso alguna dependencia de AWS la usa
+    "BSL-1.0",          # Boost Software License (muy común y segura)
+]
+
+# Umbral de confianza
+confidence-threshold = 1.0
+

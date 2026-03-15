@@ -1,0 +1,154 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright 2026 Dante Doménech Martinez dante19031999@gmail.com
+
+use crate::service::fallback::Fallback;
+use crate::service::formatter::MessageFormatter;
+use crate::service::{DefaultMessageFormatter, ServiceError};
+use crate::{LoggerStatus, Message, Service};
+use std::any::Any;
+use std::sync::Mutex;
+// =======================================================================
+// Cout / Cerr Services
+// =======================================================================
+
+/// A logging [`Service`] that targets the standard output stream ([`std::io::stdout`]).
+///
+/// Unlike other [`Service`]s, [`CoutWriteService`][`CoutService`] does not own its writer. Instead, it
+/// acquires a handle to the global process `stdout` during every [`work`](Self::work) call.
+///
+/// ### Why the Mutex?
+/// Even though `stdout` is globally available, the [`MessageFormatter`] (field `formatter`)
+/// may hold internal state (like line counters or timing data) that is not thread-safe.
+/// Wrapping the formatter in a [`Mutex`] ensures that the formatting logic remains
+/// atomic and synchronized across threads.
+pub struct CoutService<F>
+where
+    F: MessageFormatter,
+{
+    /// Thread-safe access to the formatting logic.
+    formatter: Mutex<F>,
+}
+
+impl<F> CoutService<F>
+where
+    F: MessageFormatter,
+{
+    /// Creates a new [`CoutWriteService`][`CoutService`] on the heap.
+    pub fn new(formatter: F) -> Box<Self> {
+        Box::new(Self {
+            formatter: Mutex::new(formatter),
+        })
+    }
+}
+
+impl<F> Service for CoutService<F>
+where
+    F: MessageFormatter + 'static,
+{
+    fn status(&self) -> LoggerStatus {
+        LoggerStatus::Running
+    }
+
+    /// Acquires the formatter lock and streams the formatted message to `stdout`.
+    ///
+    /// This method locks the global `stdout` stream for the duration of the formatting
+    /// process. This prevents "line interleaving" where parts of different log
+    /// messages appear mixed in the console.
+    ///
+    /// # Errors
+    /// Returns [`ServiceError::LockPoisoned`] if the internal formatter mutex is poisoned.
+    fn work(&self, msg: &Message) -> Result<(), ServiceError> {
+        let mut formatter_guard = self.formatter.lock()?;
+        let mut out = std::io::stdout();
+        formatter_guard.format_io(msg, &mut out)?;
+        Ok(())
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
+
+impl<F> Fallback for CoutService<F>
+where
+    F: MessageFormatter + 'static,
+{
+    /// Emergency fallback that attempts to log the error back to `stdout`.
+    /// If the formatter is locked or poisoned, the fallback is aborted to avoid deadlocks.
+    fn fallback(&self, error: &ServiceError, msg: &Message) {
+        if let Ok(mut guard) = self.formatter.lock() {
+            let mut out = std::io::stdout();
+            let _ = guard.format_io(msg, &mut out);
+            let _ = eprintln!("CoutWriteService Error: {}", error);
+        }
+    }
+}
+
+/// A [`CoutWriteService`][`CoutService`] pre-configured with the [`DefaultMessageFormatter`].
+pub type DefaultCoutService = CoutService<DefaultMessageFormatter>;
+
+/// A logging [`Service`] that targets the standard error stream ([`std::io::stderr`]).
+///
+/// [`CerrWriteService`][`CerrService`] is typically used for high-priority alerts or diagnostic
+/// information that should remain visible even if `stdout` is redirected to a file.
+pub struct CerrService<F>
+where
+    F: MessageFormatter,
+{
+    /// Thread-safe access to the formatting logic.
+    formatter: Mutex<F>,
+}
+
+impl<F> CerrService<F>
+where
+    F: MessageFormatter,
+{
+    /// Creates a new [`CerrWriteService`][`CerrService`] on the heap.
+    pub fn new(formatter: F) -> Box<Self> {
+        Box::new(Self {
+            formatter: Mutex::new(formatter),
+        })
+    }
+}
+
+impl<F> Service for CerrService<F>
+where
+    F: MessageFormatter + 'static,
+{
+    fn status(&self) -> LoggerStatus {
+        LoggerStatus::Running
+    }
+
+    /// Acquires the formatter lock and writes to the global `stderr`.
+    ///
+    /// # Errors
+    /// Returns [`ServiceError::LockPoisoned`] if the internal formatter mutex is poisoned.
+    fn work(&self, msg: &Message) -> Result<(), ServiceError> {
+        let mut formatter_guard = self.formatter.lock()?;
+        let mut out = std::io::stderr();
+        formatter_guard.format_io(msg, &mut out)?;
+        Ok(())
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
+
+impl<F> Fallback for CerrService<F>
+where
+    F: MessageFormatter + 'static,
+{
+    /// Fallback for `stderr` failures. Paradoxically attempts to log the
+    /// failure to `stdout` as a last-resort communication channel.
+    fn fallback(&self, error: &ServiceError, msg: &Message) {
+        if let Ok(mut guard) = self.formatter.lock() {
+            let mut out = std::io::stdout();
+            let _ = guard.format_io(msg, &mut out);
+            let _ = println!("CerrWriteService Error: {}", error);
+        }
+    }
+}
+
+/// A [`CerrWriteService`][`CerrService`] pre-configured with the [`DefaultMessageFormatter`].
+pub type DefaultCerrService = CerrService<DefaultMessageFormatter>;

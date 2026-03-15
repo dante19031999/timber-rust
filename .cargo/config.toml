@@ -1,0 +1,8 @@
+[build]
+# Esto hace que CUALQUIER cargo doc que tires en esta carpeta
+# use el flag que activa tus etiquetas bonitas
+#rustdocflags = ["--cfg", "docsrs"]
+
+[alias]
+# Ahora puedes escribir 'cargo mydoc' en lugar de todo el testamento
+mydoc = "doc --no-deps --all-features"

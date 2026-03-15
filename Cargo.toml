@@ -1,0 +1,31 @@
+[package]
+name = "timber_rust"
+version = "1.0.0"
+edition = "2024"
+license = "Apache-2.0"
+
+[features]
+serde_tools = []
+network = ["dep:reqwest"]
+json = ["dep:serde_json"]
+tokio = ["dep:tokio"]
+loki = ["network", "json", "serde_tools"]
+aws = ["dep:aws-sdk-cloudwatchlogs", "tokio", "serde_tools"]
+default = ["json"]
+
+[dependencies]
+reqwest = { version = ">=0.13.0", optional = true, features = ["blocking"] }
+crossbeam = { version = ">=0.8.0", features = ["crossbeam-channel"] }
+chrono = { version = ">=0.4.20" }
+serde_json = { version = ">=1.0.140", optional = true }
+serde = { version = ">=1.0.200", features = ["derive"] }
+aws-sdk-cloudwatchlogs = { version = ">=1.120.0", optional = true }
+tokio = { version = ">=1.50.0", optional = true }
+
+[dev-dependencies]
+regex = "1.11.1"
+
+[package.metadata.docs.rs]
+# Esto habilita el marcado de features en docs.rs
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
