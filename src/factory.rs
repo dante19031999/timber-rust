@@ -2,8 +2,11 @@
 // Copyright 2026 Dante Doménech Martinez dante19031999@gmail.com
 
 use crate::service::*;
-use crate::{QueuedLogger, Logger, SilentLogger, Service, DirectLogger, LokiLogger};
+use crate::{DirectLogger, Logger, QueuedLogger, Service, SilentLogger};
 use std::fs::File;
+
+#[cfg(feature = "loki")]
+use crate::LokiLogger;
 
 /// A centralized factory for constructing various [`Logger`] implementations.
 ///
