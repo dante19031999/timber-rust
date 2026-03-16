@@ -42,11 +42,15 @@ jobs:
         run: |
           mkdir -p target/doc/about
           cargo about generate about.hbs > target/doc/about/licenses.html
+      - name: Create Redirect Index
+        run: |
+          echo '<meta http-equiv="refresh" content="0;url=timber_rust/index.html">' > target/doc/index.html
+          touch target/doc/.nojekyll
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'target/doc/timber_rust'
+          path: 'target/doc'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
