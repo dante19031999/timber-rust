@@ -16,8 +16,6 @@ pub use error::*;
 pub use fallback::*;
 pub use formatter::*;
 pub(crate) use fv1hash::*;
-#[cfg(feature = "loki")]
-#[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
 
 #[cfg(feature = "serde_tools")]
 #[cfg_attr(docsrs, doc(cfg(feature = "serde_tools")))]
@@ -47,11 +45,22 @@ pub use crate::service::write::DefaultBoxedFmtService as DefaultBoxedFmtWriteSer
 pub use crate::service::write::ArcedFmtService as ArcedFmtWriteService;
 pub use crate::service::write::DefaultArcedFmtService as DefaultArcedFmtWriteService;
 
+#[cfg(feature = "loki")]
+#[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
 pub use crate::service::loki::Data as LokiData;
+#[cfg(feature = "loki")]
+#[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
 pub use crate::service::loki::Message as LokiMessage;
+#[cfg(feature = "loki")]
+#[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
 pub use crate::service::loki::Config as LokiConfig;
+#[cfg(feature = "loki")]
+#[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
 pub use crate::service::loki::Service as LokiService;
+#[cfg(feature = "loki")]
+#[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
 pub use crate::service::loki::DefaultService as DefaultLokiService;
+#[cfg(feature = "loki")]
+#[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
 pub use crate::service::loki::Fallback as LokiFallback;
-
 
