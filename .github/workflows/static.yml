@@ -33,9 +33,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
- 
+
       - name: Generate Docs
         run: cargo doc --no-deps --all-features
       - name: Install cargo-about
@@ -45,6 +43,8 @@ jobs:
           mkdir -p target/doc/about
           cargo about generate about.hbs > target/doc/about/licenses.html
 
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
