@@ -16,10 +16,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Check security and licenses
+    - name: Cargo Deny
       uses: embark-studios/cargo-deny-action@v1
-      with:
-        command: check --all-features
+      run: cargo deny --check
     - name: Build
       run: cargo build --verbose
     - name: Run tests
