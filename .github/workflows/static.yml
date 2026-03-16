@@ -44,9 +44,9 @@ jobs:
         run: |
           mkdir -p target/doc/about
           cargo about generate about.hbs > target/doc/about/licenses.html
-          with:
-          path: '.'
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          path: 'target/doc'
