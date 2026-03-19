@@ -3,6 +3,14 @@ name = "timber_rust"
 version = "1.0.0"
 edition = "2024"
 license = "Apache-2.0"
+authors = ["Dante Doménech Martinez <dante19031999@gmail.com>"]
+description = "A high-performance, asynchronous logging library with support for Grafana Loki and AWS CloudWatch."
+documentation = "https://docs.rs/timber-rust"
+homepage = "https://dante19031999.github.io/timber-rust/timber_rust/index.html" # Cambia tu-usuario
+repository = "https://github.com/dante19031999/timber-rust"
+readme = "README.md"
+keywords = ["logging", "loki", "cloudwatch", "aws", "async"]
+categories = ["development-tools::debugging", "network-programming"]
 
 [features]
 serde_tools = []
