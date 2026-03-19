@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Dante Doménech Martinez dante19031999@gmail.com
 
+#[cfg(feature = "aws")]
+use crate::service::CloudWatchConfig;
 #[cfg(feature = "loki")]
 use crate::service::LokiConfig;
 use crate::service::{FeatureDisabledError, FvnBuildHasher, ServiceError};
@@ -145,6 +147,40 @@ pub enum ConfigEntry {
         config: LokiConfig,
     },
 
+    /// AWS Cloudwatch Integration.
+    /// Pushes logs to a remote Cloudwatch Integration instance via AWS SDK.
+    ///
+    /// This variant is only available when the `aws` feature is enabled.
+    ///
+    /// - See: [`CloudwatchLogger`][`crate::logger::CloudWatch`].
+    /// - See: [`CloudwatchService`][`crate::service::CloudWatch`].
+    /// - See: [`CloudwatchConfig`][`crate::service::LokiConfig`].
+    /// - See:  [`DirectLogger`][`crate::DirectLogger`]
+    /// - See:  [`QueuedLogger`][`crate::QueuedLogger`]
+    #[cfg(feature = "aws")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
+    CloudWatchEnv {
+        /// Log group for the cloudwatch service. The config is loaded from ENV.
+        log_group: String,
+    },
+
+    /// AWS Cloudwatch Integration.
+    /// Pushes logs to a remote Cloudwatch Integration instance via AWS SDK.
+    ///
+    /// This variant is only available when the `aws` feature is enabled.
+    ///
+    /// - See: [`CloudwatchLogger`][`crate::logger::CloudWatch`].
+    /// - See: [`CloudwatchService`][`crate::service::CloudWatch`].
+    /// - See: [`CloudwatchConfig`][`crate::service::LokiConfig`].
+    /// - See:  [`DirectLogger`][`crate::DirectLogger`]
+    /// - See:  [`QueuedLogger`][`crate::QueuedLogger`]
+    #[cfg(feature = "aws")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
+    CloudWatchConfig {
+        /// Detailed connection and authentication settings for the cloudwatch service.
+        config: CloudWatchConfig,
+    },
+
     /// Placeholder for missing functionality.
     /// Used when a configuration specifies a model (like `loki`) but the
     /// required crate feature was not enabled at compile time.
@@ -189,6 +225,8 @@ pub enum ConfigEntry {
 /// | `file` | `path`: String | Writes logs to the specified file path. |
 /// | `buffered_file`| `path`: String | Writes logs to a file using a memory buffer for performance. Please be careful with potential log losses on panic. |
 /// | `loki` | `config`: Object | Pushes logs to a Grafana Loki instance (Requires `loki` feature). |
+/// | `cloudwatch_cfg` | `config`: Object | Pushes logs to a AWS CloudWatch instance built from config (Requires `aws` feature). |
+/// | `cloudwatch_env` | `log_group`: String | Pushes logs to a AWS CloudWatch instance built from env (Requires `aws` feature). |
 ///
 /// ---
 ///
@@ -237,6 +275,48 @@ pub enum ConfigEntry {
 ///       "path": "./logs/latest.log" // Careful with relative paths!
 ///     }
 ///   ]
+/// }
+///
+/// ## CloudWatch Configuration ([config][`CloudWatchConfig`] object)
+///
+/// When `model` is set to `"cloudwatch_cfg"`, the `config` field must be an object with these fields:
+///
+/// ### Required Fields
+/// - **`access_key_id`**: (String) AWS Access Key ID.
+/// - **`access_key_secret`**: (String) AWS Secret Access Key.
+/// - **`log_group`**: (String) The name of the CloudWatch Log Group (e.g., `"my-app-logs"`).
+/// - **`region`**: (String) The AWS Region (e.g., `"us-east-1"`).
+///
+/// ### Optional Fields
+/// - **`session_token`**: (String) Optional session token for temporary credentials (STS).
+/// - **`expires_in`**: (Timestamp) Optional expiration time for the credentials.
+///   - Can be an **ISO 8601 String** (e.g., `"2026-03-18T19:00:00Z"`).
+///   - Can be an **Object**: `{ "secs_since_epoch": 1742324400, "nanos_since_epoch": 0 }`.
+///
+/// ### Absent fields
+/// - **`provider`**: Because of how the AWS SDK is constructed this field is therefore
+/// impossible to safely serializa/deserialize. You may use a middleware or other strategies
+/// if you wish to modify it.
+///
+/// ## Complete Example
+/// ```json
+/// {
+///   "channels": {
+///     "aws-production": {
+///       "model": "cloudwatch_cfg",
+///       "config": {
+///         "access_key_id": "AKIA...",
+///         "access_key_secret": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+///         "region": "eu-west-1",
+///         "log_group": "/aws/vendedlogs/states/my-app",
+///         "provider": "auth-service-prod"
+///       }
+///     },
+///     "local-file": {
+///       "model": "file",
+///       "path": "./logs/latest.log"
+///     }
+///   }
 /// }
 /// ```
 #[derive(Clone, Debug, Serialize, Deserialize)]
