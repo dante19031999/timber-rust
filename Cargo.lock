@@ -2009,7 +2009,6 @@ name = "timber_rust"
 version = "1.0.0"
 dependencies = [
  "aws-config",
- "aws-credential-types",
  "aws-sdk-cloudwatchlogs",
  "chrono",
  "crossbeam",
