@@ -194,7 +194,7 @@ impl LoggerImpl for Loki {
     /// ### Thread Safety & Performance
     /// This method is non-blocking (except for a very brief lock on the highwater
     /// timestamp). If the background worker is overloaded or the channel is
-    /// disconnected, it triggers the [`LokiFallback`][`crate::service::LokiFallback`] immediately to avoid data loss.
+    /// disconnected, it triggers the [`Fallback`][`crate::service::Fallback`] immediately to avoid data loss.
     ///
     /// # Parameters
     /// - `message`: The log entry containing level, target, and content.

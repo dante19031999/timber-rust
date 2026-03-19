@@ -5,7 +5,7 @@
 #![cfg_attr(docsrs, doc(cfg(feature = "loki")))]
 
 use crate::service::{HttpError, LokiData, LokiMessage, ServiceError};
-use crate::{LokiLogger, Message};
+use crate::{Fallback, LokiLogger, Message};
 use chrono::{SecondsFormat, Utc};
 use reqwest::blocking::Response;
 use serde_json::json;
@@ -168,15 +168,24 @@ pub trait Service: Fallback {
     }
 }
 
-/// A resilience strategy for handling Loki delivery failures.
+/// The standard implementation of the Loki transport logic.
 ///
-/// [`LokiFallback`][`Fallback`] provides a "last-resort" mechanism to prevent data loss when
-/// the background worker cannot deliver logs to the remote server.
+/// [`DefaultLokiService`][`DefaultService`] provides the baseline behavior for the logging pipeline,
+/// using the standard batching and retry mechanisms defined in the [`LokiService`][`Service`]
+/// default trait methods.
 ///
-/// ### Hierarchy
-/// This trait is a super-trait of [`LokiService`][`Service`]. Every service must define
-/// what happens when the primary transport (HTTP) fails.
-pub trait Fallback {
+/// ### Behavior
+/// - **Transport**: Uses the `reqwest` blocking client to push JSON payloads.
+/// - **Fallback**: Inherits the default [`LokiFallback`][`Fallback`] behavior, which redirects
+///   failed logs to the system's standard error and output streams.
+///
+/// This struct is stateless, acting primarily as a marker to satisfy the trait
+/// requirements of the [`LokiLogger`].
+pub struct DefaultService {}
+
+impl Service for DefaultService {}
+
+impl Fallback for DefaultService {
     /// Handles the ultimate delivery failure for a log message.
     ///
     /// This method is the "safety net" of the logging pipeline. It is invoked when
@@ -210,22 +219,3 @@ pub trait Fallback {
         println!("{} [{}] | {}", now, msg.level(), msg.content());
     }
 }
-
-/// The standard implementation of the Loki transport logic.
-///
-/// [`DefaultLokiService`][`DefaultService`] provides the baseline behavior for the logging pipeline,
-/// using the standard batching and retry mechanisms defined in the [`LokiService`][`Service`]
-/// default trait methods.
-///
-/// ### Behavior
-/// - **Transport**: Uses the `reqwest` blocking client to push JSON payloads.
-/// - **Fallback**: Inherits the default [`LokiFallback`][`Fallback`] behavior, which redirects
-///   failed logs to the system's standard error and output streams.
-///
-/// This struct is stateless, acting primarily as a marker to satisfy the trait
-/// requirements of the [`LokiLogger`].
-pub struct DefaultService {}
-
-impl Service for DefaultService {}
-
-impl Fallback for DefaultService {}
