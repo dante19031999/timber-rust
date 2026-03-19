@@ -1,8 +1,9 @@
+use crate::service::ServiceError;
+use crate::service::write::{DefaultMessageFormatter, MessageFormatter};
+use crate::{Fallback, LoggerStatus, Message, Service};
 use std::any::Any;
 use std::ops::DerefMut;
 use std::sync::{Arc, Mutex};
-use crate::{Fallback, LoggerStatus, Message, Service};
-use crate::service::{DefaultMessageFormatter, MessageFormatter, ServiceError};
 
 /// A private synchronization container for heap-allocated string writers.
 ///
@@ -55,7 +56,26 @@ where
     ///   the string writer (e.g., a custom UI buffer vs. a standard [`String`])
     ///   is not known at compile time.
     /// - `formatter`: The [`MessageFormatter`] implementation.
-    pub fn new(writer: Arc<Mutex<dyn std::fmt::Write + Send + Sync>>, formatter: F) -> Box<Self> {
+    pub fn new(writer: Arc<Mutex<dyn std::fmt::Write + Send + Sync>>) -> Box<Self> {
+        Box::new(Self {
+            writer: Mutex::new(ArcedFmtServiceData {
+                writer,
+                formatter: Default::default(),
+            }),
+        })
+    }
+
+    /// Creates a new [`ArcedFmtWriteService`][`ArcedFmtService`] on the heap with a custom [formatter][`MessageFormatter`].
+    ///
+    /// # Parameters
+    /// - `writer`: A shared trait object. This is useful when the exact type of
+    ///   the string writer (e.g., a custom UI buffer vs. a standard [`String`])
+    ///   is not known at compile time.
+    /// - `formatter`: The [`MessageFormatter`] implementation.
+    pub fn with_formatter(
+        writer: Arc<Mutex<dyn std::fmt::Write + Send + Sync>>,
+        formatter: F,
+    ) -> Box<Self> {
         Box::new(Self {
             writer: Mutex::new(ArcedFmtServiceData { writer, formatter }),
         })

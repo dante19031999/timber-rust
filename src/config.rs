@@ -136,6 +136,7 @@ pub enum ConfigEntry {
     ///
     /// This variant is only available when the `loki` feature is enabled.
     ///
+    /// - See: [`LokiLogger`][`crate::logger::Loki`].
     /// - See: [`LokiService`][`crate::service::LokiService`].
     /// - See: [`LokiConfig`][`crate::service::LokiConfig`].
     /// - See:  [`DirectLogger`][`crate::DirectLogger`]
@@ -375,6 +376,12 @@ impl Config {
                 },
                 #[cfg(feature = "loki")]
                 ConfigEntry::Loki { config } => LoggerFactory::loki(config),
+                #[cfg(feature = "aws")]
+                ConfigEntry::CloudWatchConfig { config } => LoggerFactory::cloudwatch_cfg(config),
+                #[cfg(feature = "aws")]
+                ConfigEntry::CloudWatchEnv { log_group } => {
+                    LoggerFactory::cloudwatch_env(log_group)
+                }
                 ConfigEntry::DisabledFeature {
                     concurrency: _concurrency,
                     feature,
@@ -514,10 +521,43 @@ impl Config {
     ///
     /// See: [`ConfigEntry::Loki`]
     #[cfg(feature = "loki")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
     pub fn insert_entry_loki<S>(&mut self, channel: S, config: LokiConfig)
     where
         S: Into<String>,
     {
         self.insert_entry(channel, ConfigEntry::Loki { config });
+    }
+
+    /// Adds a AWS Cloudwatch logger from config to the specified channel.
+    /// Only available when the `aws` feature is enabled.
+    ///
+    /// See: [`ConfigEntry::CloudWatchConfig`]
+    #[cfg(feature = "aws")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
+    pub fn insert_entry_cloudwatch_cfg<S>(&mut self, channel: S, config: CloudWatchConfig)
+    where
+        S: Into<String>,
+    {
+        self.insert_entry(channel, ConfigEntry::CloudWatchConfig { config });
+    }
+
+    /// Adds a AWS Cloudwatch logger from config to the specified channel.
+    /// Only available when the `aws` feature is enabled.
+    ///
+    /// See: [`ConfigEntry::CloudWatchEnv`]
+    #[cfg(feature = "aws")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
+    pub fn insert_entry_cloudwatch_env<S1, S2>(&mut self, channel: S1, log_group: S2)
+    where
+        S1: Into<String>,
+        S2: Into<String>,
+    {
+        self.insert_entry(
+            channel,
+            ConfigEntry::CloudWatchEnv {
+                log_group: log_group.into(),
+            },
+        );
     }
 }

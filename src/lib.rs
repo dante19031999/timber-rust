@@ -34,6 +34,9 @@ pub use logger::LoggerImpl;
 #[cfg(feature = "loki")]
 #[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
 pub use logger::Loki as LokiLogger;
+#[cfg(feature = "aws")]
+#[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
+pub use logger::CloudWatch as CloudWatchLogger;
 pub use logger::Queued as QueuedLogger;
 pub use logger::Silent as SilentLogger;
 pub use logger::Status as LoggerStatus;

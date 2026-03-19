@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Dante Doménech Martinez dante19031999@gmail.com
 
+use crate::service::ServiceError;
 use crate::service::fallback::Fallback;
-use crate::service::formatter::MessageFormatter;
-use crate::service::{DefaultMessageFormatter, ServiceError};
+use crate::service::write::{DefaultMessageFormatter, MessageFormatter};
 use crate::{LoggerStatus, Message, Service};
 use std::any::Any;
 use std::sync::Mutex;
@@ -34,7 +34,14 @@ where
     F: MessageFormatter,
 {
     /// Creates a new [`CoutWriteService`][`CoutService`] on the heap.
-    pub fn new(formatter: F) -> Box<Self> {
+    pub fn new() -> Box<Self> {
+        Box::new(Self {
+            formatter: Mutex::new(Default::default()),
+        })
+    }
+
+    /// Creates a new [`CoutWriteService`][`CoutService`] on the heap  with a custom [formatter][`MessageFormatter`].
+    pub fn with_formatter(formatter: F) -> Box<Self> {
         Box::new(Self {
             formatter: Mutex::new(formatter),
         })
@@ -104,7 +111,14 @@ where
     F: MessageFormatter,
 {
     /// Creates a new [`CerrWriteService`][`CerrService`] on the heap.
-    pub fn new(formatter: F) -> Box<Self> {
+    pub fn new() -> Box<Self> {
+        Box::new(Self {
+            formatter: Mutex::new(Default::default()),
+        })
+    }
+
+    /// Creates a new [`CerrWriteService`][`CerrService`] on the heap with a custom [formatter][`MessageFormatter`].
+    pub fn with_formatter(formatter: F) -> Box<Self> {
         Box::new(Self {
             formatter: Mutex::new(formatter),
         })

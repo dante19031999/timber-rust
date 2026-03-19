@@ -3,7 +3,7 @@
 
 use crate::service::ServiceError;
 use crate::service::fallback::Fallback;
-use crate::service::formatter::{DefaultMessageFormatter, MessageFormatter};
+use crate::service::write::{DefaultMessageFormatter, MessageFormatter};
 use crate::{LoggerStatus, Message, Service};
 use std::any::Any;
 use std::sync::Mutex;
@@ -53,7 +53,21 @@ where
     /// # Parameters
     /// - `writer`: A type implementing [`std::io::Write`].
     /// - `formatter`: The [`MessageFormatter`] implementation.
-    pub fn new(writer: W, formatter: F) -> Box<Self> {
+    pub fn new(writer: W) -> Box<Self> {
+        Box::new(Self {
+            writer: Mutex::new(IoServiceData {
+                writer,
+                formatter: Default::default(),
+            }),
+        })
+    }
+
+    /// Creates a new [`IoService`] on the heap with a custom [formatter][`MessageFormatter`].
+    ///
+    /// # Parameters
+    /// - `writer`: A type implementing [`std::io::Write`].
+    /// - `formatter`: The [`MessageFormatter`] implementation.
+    pub fn with_formatter(writer: W, formatter: F) -> Box<Self> {
         Box::new(Self {
             writer: Mutex::new(IoServiceData { writer, formatter }),
         })
@@ -114,8 +128,7 @@ where
 ///
 /// **Bound Requirements:** The inner writer must be [`Send`] + [`Sync`] + `'static`.
 #[allow(type_alias_bounds)]
-pub type BoxedIoService<F: MessageFormatter> =
-    IoService<Box<dyn std::io::Write + Send + Sync>, F>;
+pub type BoxedIoService<F: MessageFormatter> = IoService<Box<dyn std::io::Write + Send + Sync>, F>;
 
 /// A type alias for an [`IoWriteService`][`IoService`] writing specifically to a [`std::fs::File`].
 #[allow(type_alias_bounds)]

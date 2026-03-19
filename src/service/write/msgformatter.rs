@@ -9,7 +9,7 @@ use chrono::{DateTime, SecondsFormat, Utc};
 ///
 /// Implementations are responsible for defining the layout (timestamp, level, content)
 /// and writing the result to an I/O sink.
-pub trait MessageFormatter {
+pub trait MessageFormatter: Send + Sync + Default {
     /// Formats and writes the message to the provided I/O sink.
     ///
     /// ### Implementation Requirements
@@ -22,7 +22,7 @@ pub trait MessageFormatter {
     ///
     /// # Errors
     /// Returns [`ServiceError`] if formatting fails or the writer encounters an I/O error.
-        fn format_io(
+    fn format_io(
         &mut self,
         message: &Message,
         write: &mut (dyn std::io::Write + Send + Sync),
@@ -53,8 +53,8 @@ pub trait MessageFormatter {
 /// 2026-03-14T15:30:00.123456789+00:00 [ INFO  ] Service started successfully
 /// 2026-03-14T15:30:05.000000000+00:00 [ DEBUG ] Connecting to Loki at localhost:3100
 /// ```
+#[derive(Default)]
 pub struct DefaultMessageFormatter {}
-
 
 impl DefaultMessageFormatter {
     /// Creates a formatter with a default buffer capacity of 128 bytes.
@@ -112,8 +112,8 @@ impl MessageFormatter for DefaultMessageFormatter {
 /// [ INFO  ] Service started successfully
 /// [ DEBUG ] Connecting to Loki at localhost:3100
 /// ```
+#[derive(Default)]
 pub struct AtemporalMessageFormatter {}
-
 
 impl AtemporalMessageFormatter {
     /// Creates a formatter with a default buffer capacity of 128 bytes.
@@ -128,12 +128,7 @@ impl MessageFormatter for AtemporalMessageFormatter {
         message: &Message,
         write: &mut (dyn std::io::Write + Send + Sync),
     ) -> Result<(), ServiceError> {
-        write!(
-            write,
-            "[ {} ] {}\n",
-            message.level(),
-            message.content()
-        )?;
+        write!(write, "[ {} ] {}\n", message.level(), message.content())?;
         Ok(())
     }
 
@@ -142,13 +137,7 @@ impl MessageFormatter for AtemporalMessageFormatter {
         message: &Message,
         write: &mut (dyn std::fmt::Write + Send + Sync),
     ) -> Result<(), ServiceError> {
-        write!(
-            write,
-            "[ {} ] {}\n",
-            message.level(),
-            message.content()
-        )?;
+        write!(write, "[ {} ] {}\n", message.level(), message.content())?;
         Ok(())
     }
 }
-

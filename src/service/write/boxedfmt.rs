@@ -1,7 +1,8 @@
+use crate::{Fallback, LoggerStatus, Message, Service};
 use std::any::Any;
 use std::sync::Mutex;
-use crate::{Fallback, LoggerStatus, Message, Service};
-use crate::service::{DefaultMessageFormatter, MessageFormatter, ServiceError};
+use crate::service::ServiceError;
+use crate::service::write::{DefaultMessageFormatter, MessageFormatter};
 
 /// A private synchronization container for heap-allocated string writers.
 ///
@@ -51,7 +52,26 @@ where
     ///   the string writer (e.g., a custom UI buffer vs. a standard [`String`])
     ///   is not known at compile time.
     /// - `formatter`: The [`MessageFormatter`] implementation.
-    pub fn new(writer: Box<dyn std::fmt::Write + Send + Sync>, formatter: F) -> Box<Self> {
+    pub fn new(writer: Box<dyn std::fmt::Write + Send + Sync>) -> Box<Self> {
+        Box::new(Self {
+            writer: Mutex::new(BoxedFmtServiceData {
+                writer,
+                formatter: Default::default(),
+            }),
+        })
+    }
+
+    /// Creates a new [`BoxedFmtWriteService`][`BoxedFmtService`] on the heap with a custom [formatter][`MessageFormatter`].
+    ///
+    /// # Parameters
+    /// - `writer`: A boxed trait object. This is useful when the exact type of
+    ///   the string writer (e.g., a custom UI buffer vs. a standard [`String`])
+    ///   is not known at compile time.
+    /// - `formatter`: The [`MessageFormatter`] implementation.
+    pub fn with_formatter(
+        writer: Box<dyn std::fmt::Write + Send + Sync>,
+        formatter: F,
+    ) -> Box<Self> {
         Box::new(Self {
             writer: Mutex::new(BoxedFmtServiceData { writer, formatter }),
         })

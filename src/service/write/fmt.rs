@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Dante Doménech Martinez dante19031999@gmail.com
 
-use crate::service::fallback::Fallback;
-use crate::service::formatter::{DefaultMessageFormatter, MessageFormatter};
 use crate::service::ServiceError;
+use crate::service::fallback::Fallback;
+use crate::service::write::{DefaultMessageFormatter, MessageFormatter};
 use crate::{LoggerStatus, Message, Service};
 use std::any::Any;
 use std::sync::Mutex;
@@ -50,7 +50,7 @@ where
 impl<W, F> FmtService<W, F>
 where
     W: std::fmt::Write + Send + Sync,
-    F: MessageFormatter,
+    F: MessageFormatter + Default,
 {
     /// Creates a new, heap-allocated [`FmtWriteService`][`FmtService`][`FmtService`].
     ///
@@ -61,12 +61,37 @@ where
     /// # Example
     /// ```
     /// # use timber_rust::{QueuedLogger, Logger};
-    /// # use timber_rust::service::{DefaultMessageFormatter, FmtWriteService};
-    /// let service = FmtWriteService::new(String::new(), DefaultMessageFormatter{});
+    /// # use timber_rust::service::{FmtWriteService};
+    /// # use timber_rust::service::write::DefaultMessageFormatter;
+    /// let service = FmtWriteService::<String, DefaultMessageFormatter>::new(String::new());
     /// let logger = QueuedLogger::new(service, 3, 4); // 3 retries, 4 worker threads
     /// let logger = Logger::new(logger);
     /// ```
-    pub fn new(writer: W, formatter: F) -> Box<Self> {
+    pub fn new(writer: W) -> Box<Self> {
+        Box::new(Self {
+            writer: Mutex::new(FmtServiceData {
+                writer,
+                formatter: F::default(),
+            }),
+        })
+    }
+
+    /// Creates a new, heap-allocated [`FmtWriteService`][`FmtService`][`FmtService`] with a custom [formatter][`MessageFormatter`].
+    ///
+    /// # Parameters
+    /// - `writer`: An object implementing [`std::fmt::Write`].
+    /// - `formatter`: An object implementing [`MessageFormatter`].
+    ///
+    /// # Example
+    /// ```
+    /// # use timber_rust::{QueuedLogger, Logger};
+    /// # use timber_rust::service::write::DefaultMessageFormatter;
+    /// # use timber_rust::service::FmtWriteService;
+    /// let service = FmtWriteService::<String, DefaultMessageFormatter>::new(String::new());
+    /// let logger = QueuedLogger::new(service, 3, 4); // 3 retries, 4 worker threads
+    /// let logger = Logger::new(logger);
+    /// ```
+    pub fn with_formatter(writer: W, formatter: F) -> Box<Self> {
         Box::new(Self {
             writer: Mutex::new(FmtServiceData { writer, formatter }),
         })
@@ -186,4 +211,3 @@ pub type StringService<F: MessageFormatter> = FmtService<String, F>;
 ///
 /// This provides a zero-configuration path for in-memory string logging.
 pub type DefaultStringService = FmtService<String, DefaultMessageFormatter>;
-
