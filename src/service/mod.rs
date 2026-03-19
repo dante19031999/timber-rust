@@ -11,6 +11,8 @@ mod service;
 pub mod write;
 #[cfg(feature = "loki")]
 pub mod loki;
+#[cfg(feature = "aws")]
+pub mod aws;
 
 pub use error::*;
 pub use fallback::*;
@@ -64,3 +66,18 @@ pub use crate::service::loki::DefaultService as DefaultLokiService;
 #[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
 pub use crate::service::loki::Fallback as LokiFallback;
 
+#[cfg(feature = "aws")]
+#[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
+pub use crate::service::aws::Data as CloudWatchData;
+#[cfg(feature = "aws")]
+#[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
+pub use crate::service::aws::Message as CloudWatchMessage;
+#[cfg(feature = "aws")]
+#[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
+pub use crate::service::aws::Config as CloudWatchConfig;
+#[cfg(feature = "aws")]
+#[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
+pub use crate::service::aws::CloudWatch as CloudWatch;
+#[cfg(feature = "aws")]
+#[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
+pub use crate::service::aws::SimpleCloudWatch as SimpleCloudWatch;

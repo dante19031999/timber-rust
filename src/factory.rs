@@ -5,6 +5,8 @@ use crate::service::*;
 use crate::{DirectLogger, Logger, QueuedLogger, Service, SilentLogger};
 use std::fs::File;
 
+#[cfg(feature = "aws")]
+use crate::CloudWatchLogger;
 #[cfg(feature = "loki")]
 use crate::LokiLogger;
 
@@ -495,5 +497,59 @@ impl LoggerFactory {
     #[cfg(feature = "loki")]
     pub fn loki(config: LokiConfig) -> Logger {
         Logger::new(LokiLogger::new(config))
+    }
+
+    /// Creates a new [`CloudWatchLogger`] wrapped in a [`Logger`] container.
+    ///
+    /// This function initializes a background worker thread that buffers and batches logs
+    /// before pushing them to a AWS Cloudwatch instance.
+    ///
+    /// ### Behavior
+    /// - **Queuedhronous**: Log calls are non-blocking; they are sent to a channel and
+    ///   processed by a dedicated worker.
+    /// - **Batching**: The worker automatically groups messages by level and time
+    ///   to optimize HTTP pressure.
+    ///
+    /// ### Fallback
+    /// If all retry attempts fail (or the network is unreachable), the logger will
+    /// trigger a fallback mechanism (printing to `stderr/stdout`) to ensure no data loss.
+    ///
+    /// ### Feature Gate
+    /// Requires the **`aws`** feature to be enabled.
+    ///
+    /// # Panics
+    /// - if the AWS client cannot be initialized due to
+    /// invalid system configuration or TLS issues.
+    #[cfg(feature = "aws")]
+    pub fn cloudwatch_cfg(config: CloudWatchConfig) -> Logger {
+        Logger::new(CloudWatchLogger::new(config))
+    }
+
+    /// Creates a new [`CloudWatchLogger`] wrapped in a [`Logger`] container.
+    ///
+    /// This function initializes a background worker thread that buffers and batches logs
+    /// before pushing them to a AWS Cloudwatch instance.
+    ///
+    /// Config is loaded from ENV.
+    ///
+    /// ### Behavior
+    /// - **Queuedhronous**: Log calls are non-blocking; they are sent to a channel and
+    ///   processed by a dedicated worker.
+    /// - **Batching**: The worker automatically groups messages by level and time
+    ///   to optimize HTTP pressure.
+    ///
+    /// ### Fallback
+    /// If all retry attempts fail (or the network is unreachable), the logger will
+    /// trigger a fallback mechanism (printing to `stderr/stdout`) to ensure no data loss.
+    ///
+    /// ### Feature Gate
+    /// Requires the **`aws`** feature to be enabled.
+    ///
+    /// # Panics
+    /// - if the AWS client cannot be initialized due to
+    /// invalid system configuration or TLS issues.
+    #[cfg(feature = "aws")]
+    pub fn cloudwatch_env(log_group: String) -> Logger {
+        Logger::new(CloudWatchLogger::from_env(log_group))
     }
 }
