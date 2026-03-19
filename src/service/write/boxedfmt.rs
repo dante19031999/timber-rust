@@ -2,7 +2,7 @@ use crate::{Fallback, LoggerStatus, Message, Service};
 use std::any::Any;
 use std::sync::Mutex;
 use crate::service::ServiceError;
-use crate::service::write::{DefaultMessageFormatter, MessageFormatter};
+use crate::service::write::{StandardMessageFormatter, MessageFormatter};
 
 /// A private synchronization container for heap-allocated string writers.
 ///
@@ -174,8 +174,8 @@ where
     }
 }
 
-/// A [`BoxedFmtWriteService`][`BoxedFmtService`] pre-configured with the [`DefaultMessageFormatter`].
+/// A [`BoxedFmtWriteService`][`BoxedFmtService`] pre-configured with the [`StandardMessageFormatter`].
 ///
 /// This type is commonly used as a catch-all for string-based logging where
 /// maximum flexibility is required for the output destination.
-pub type DefaultBoxedFmtService = BoxedFmtService<DefaultMessageFormatter>;
+pub type StandardBoxedFmtService = BoxedFmtService<StandardMessageFormatter>;

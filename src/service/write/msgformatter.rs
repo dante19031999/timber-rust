@@ -54,16 +54,16 @@ pub trait MessageFormatter: Send + Sync + Default {
 /// 2026-03-14T15:30:05.000000000+00:00 [ DEBUG ] Connecting to Loki at localhost:3100
 /// ```
 #[derive(Default)]
-pub struct DefaultMessageFormatter {}
+pub struct StandardMessageFormatter {}
 
-impl DefaultMessageFormatter {
+impl StandardMessageFormatter {
     /// Creates a formatter with a default buffer capacity of 128 bytes.
     pub fn new() -> Self {
-        DefaultMessageFormatter {}
+        StandardMessageFormatter {}
     }
 }
 
-impl MessageFormatter for DefaultMessageFormatter {
+impl MessageFormatter for StandardMessageFormatter {
     fn format_io(
         &mut self,
         message: &Message,

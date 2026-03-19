@@ -3,7 +3,7 @@
 
 use crate::service::ServiceError;
 use crate::service::fallback::Fallback;
-use crate::service::write::{DefaultMessageFormatter, MessageFormatter};
+use crate::service::write::{StandardMessageFormatter, MessageFormatter};
 use crate::{LoggerStatus, Message, Service};
 use std::any::Any;
 use std::sync::Mutex;
@@ -91,8 +91,8 @@ where
     }
 }
 
-/// A [`CoutWriteService`][`CoutService`] pre-configured with the [`DefaultMessageFormatter`].
-pub type DefaultCoutService = CoutService<DefaultMessageFormatter>;
+/// A [`CoutWriteService`][`CoutService`] pre-configured with the [`StandardMessageFormatter`].
+pub type StandardCoutService = CoutService<StandardMessageFormatter>;
 
 /// A logging [`Service`] that targets the standard error stream ([`std::io::stderr`]).
 ///
@@ -164,5 +164,5 @@ where
     }
 }
 
-/// A [`CerrWriteService`][`CerrService`] pre-configured with the [`DefaultMessageFormatter`].
-pub type DefaultCerrService = CerrService<DefaultMessageFormatter>;
+/// A [`CerrWriteService`][`CerrService`] pre-configured with the [`StandardMessageFormatter`].
+pub type StandardCerrService = CerrService<StandardMessageFormatter>;

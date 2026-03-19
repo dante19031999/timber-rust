@@ -1,5 +1,5 @@
 use crate::service::ServiceError;
-use crate::service::write::{DefaultMessageFormatter, MessageFormatter};
+use crate::service::write::{StandardMessageFormatter, MessageFormatter};
 use crate::{Fallback, LoggerStatus, Message, Service};
 use std::any::Any;
 use std::ops::DerefMut;
@@ -186,8 +186,8 @@ where
     }
 }
 
-/// A [`ArcedFmtWriteService`][`ArcedFmtService`] pre-configured with the [`DefaultMessageFormatter`].
+/// A [`ArcedFmtWriteService`][`ArcedFmtService`] pre-configured with the [`StandardMessageFormatter`].
 ///
 /// This type is commonly used as a catch-all for string-based logging where
 /// maximum flexibility is required for the output destination.
-pub type DefaultArcedFmtService = ArcedFmtService<DefaultMessageFormatter>;
+pub type StandardArcedFmtService = ArcedFmtService<StandardMessageFormatter>;

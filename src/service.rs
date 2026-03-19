@@ -23,29 +23,29 @@ pub use serde::BasicAuth;
 pub use serror::*;
 pub use service::*;
 
-pub use crate::service::write::DefaultMessageFormatter as DefaultWriteMessageFormatter;
+pub use crate::service::write::StandardMessageFormatter as StandardWriteMessageFormatter;
 pub use crate::service::write::MessageFormatter as WriteMessageFormatter;
 
 pub use crate::service::write::BoxedIoService as BoxedIoWriteService;
-pub use crate::service::write::DefaultBoxedIoService as DefaultBoxedIoWriteService;
-pub use crate::service::write::DefaultFileWriteService;
+pub use crate::service::write::StandardBoxedIoService as StandardBoxedIoWriteService;
+pub use crate::service::write::StandardFileWriteService;
 pub use crate::service::write::FileWriteService;
 pub use crate::service::write::IoService as IoWriteService;
 
-pub use crate::service::write::DefaultStringService as DefaultStringWriteService;
+pub use crate::service::write::StandardStringService as StandardStringWriteService;
 pub use crate::service::write::FmtService as FmtWriteService;
 pub use crate::service::write::StringService as StringWriteService;
 
 pub use crate::service::write::CerrService as CerrWriteService;
 pub use crate::service::write::CoutService as CoutWriteService;
-pub use crate::service::write::DefaultCerrService as DefaultCerrWriteService;
-pub use crate::service::write::DefaultCoutService as DefaultCoutWriteService;
+pub use crate::service::write::StandardCerrService as StandardCerrWriteService;
+pub use crate::service::write::StandardCoutService as StandardCoutWriteService;
 
 pub use crate::service::write::BoxedFmtService as BoxedFmtWriteService;
-pub use crate::service::write::DefaultBoxedFmtService as DefaultBoxedFmtWriteService;
+pub use crate::service::write::StandardBoxedFmtService as StandardBoxedFmtWriteService;
 
 pub use crate::service::write::ArcedFmtService as ArcedFmtWriteService;
-pub use crate::service::write::DefaultArcedFmtService as DefaultArcedFmtWriteService;
+pub use crate::service::write::StandardArcedFmtService as StandardArcedFmtWriteService;
 
 #[cfg(feature = "loki")]
 #[cfg_attr(docsrs, doc(cfg(feature = "loki")))]

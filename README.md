@@ -46,8 +46,8 @@ logger_stdout.log(("INFO", "Hello world!"));
 logger_stderr.log((LogLevel::Info, "Hello world!"));
 ```
 
-- See: [`DefaultCoutWriteService`][`service::DefaultCoutWriteService`]
-- See: [`DefaultCerrWriteService`][`service::DefaultCerrWriteService`]
+- See: [`DefaultCoutWriteService`][`service::StandardCoutWriteService`]
+- See: [`DefaultCerrWriteService`][`service::StandardCerrWriteService`]
 
 ### Logging into a file
 
@@ -72,7 +72,7 @@ logger.log((LogLevel::Info, "Hello world!"));
 # let _ = std::fs::remove_file("logs.txt");
 ```
 
-- See: [`DefaultFileWriteService`][`crate::service::DefaultFileWriteService`]
+- See: [`DefaultFileWriteService`][`crate::service::StandardFileWriteService`]
 
 ### Logging into loki
 

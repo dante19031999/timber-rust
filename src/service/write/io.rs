@@ -3,7 +3,7 @@
 
 use crate::service::ServiceError;
 use crate::service::fallback::Fallback;
-use crate::service::write::{DefaultMessageFormatter, MessageFormatter};
+use crate::service::write::{StandardMessageFormatter, MessageFormatter};
 use crate::{LoggerStatus, Message, Service};
 use std::any::Any;
 use std::sync::Mutex;
@@ -134,9 +134,9 @@ pub type BoxedIoService<F: MessageFormatter> = IoService<Box<dyn std::io::Write 
 #[allow(type_alias_bounds)]
 pub type FileWriteService<F: MessageFormatter> = IoService<std::fs::File, F>;
 
-/// A pre-configured [`BoxedIoWriteService`][`BoxedIoService`] using the crate's [`DefaultMessageFormatter`].
-pub type DefaultBoxedIoService =
-    IoService<Box<dyn std::io::Write + Send + Sync>, DefaultMessageFormatter>;
+/// A pre-configured [`BoxedIoWriteService`][`BoxedIoService`] using the crate's [`StandardMessageFormatter`].
+pub type StandardBoxedIoService =
+    IoService<Box<dyn std::io::Write + Send + Sync>, StandardMessageFormatter>;
 
-/// A pre-configured [`FileWriteService`] using the crate's [`DefaultMessageFormatter`].
-pub type DefaultFileWriteService = IoService<std::fs::File, DefaultMessageFormatter>;
+/// A pre-configured [`FileWriteService`] using the crate's [`StandardMessageFormatter`].
+pub type StandardFileWriteService = IoService<std::fs::File, StandardMessageFormatter>;

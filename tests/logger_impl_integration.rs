@@ -4,13 +4,13 @@
 use std::borrow::Cow;
 use std::io::Cursor;
 use std::sync::{Arc, Mutex};
-use timber_rust::service::write::{AtemporalMessageFormatter, DefaultMessageFormatter};
+use timber_rust::service::write::{AtemporalMessageFormatter, StandardMessageFormatter};
 use timber_rust::service::{ArcedFmtWriteService, StringWriteService, WriteMessageFormatter};
 use timber_rust::{DirectLogger, LogLevel, Logger, MessageFactory, QueuedLogger};
 
 #[test]
 pub fn test_default_message_formatter() {
-    let mut formatter = DefaultMessageFormatter::new();
+    let mut formatter = StandardMessageFormatter::new();
 
     let message = MessageFactory::string_msg(LogLevel::Debug, "Test message");
 

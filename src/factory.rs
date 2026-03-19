@@ -112,7 +112,7 @@ impl LoggerFactory {
     /// - **Execution:** Blocking; the caller waits for the write to finish.
     pub fn direct_cout() -> Logger {
         Logger::new(DirectLogger::new(
-            DefaultCoutWriteService::new(),
+            StandardCoutWriteService::new(),
             0, // <--- Retry count set to 0
         ))
     }
@@ -124,7 +124,7 @@ impl LoggerFactory {
     /// - **Workers:** 1 (Single background thread to maintain message order).
     pub fn queued_cout() -> Logger {
         Logger::new(QueuedLogger::new(
-            DefaultCoutWriteService::new(),
+            StandardCoutWriteService::new(),
             0, // <--- Retry count
             1, // <--- Worker count
         ))
@@ -161,14 +161,14 @@ impl LoggerFactory {
     ///
     /// **Hardcoded Config:** 0 retries.
     pub fn direct_cerr() -> Logger {
-        Logger::new(DirectLogger::new(DefaultCerrWriteService::new(), 0))
+        Logger::new(DirectLogger::new(StandardCerrWriteService::new(), 0))
     }
 
     /// Creates an [asynchronous logger][`QueuedLogger`] for `stderr`.
     ///
     /// **Hardcoded Config:** 0 retries, 1 background worker.
     pub fn queued_cerr() -> Logger {
-        Logger::new(QueuedLogger::new(DefaultCerrWriteService::new(), 0, 1))
+        Logger::new(QueuedLogger::new(StandardCerrWriteService::new(), 0, 1))
     }
 
     /// Creates a [synchronous logger][`DirectLogger`] for `stderr` with a [custom formatter][`MessageFormatter`].
@@ -209,22 +209,22 @@ impl LoggerFactory {
     /// Creates a [synchronous logger][`DirectLogger`] that writes to a filesystem [`File`].
     ///
     /// **Configuration:**
-    /// - **Formatter:** Uses the [`DefaultMessageFormatter`][`crate::service::write::DefaultMessageFormatter`].
+    /// - **Formatter:** Uses the [`StandardMessageFormatter`][`crate::service::write::StandardMessageFormatter`].
     /// - **Retries:** 0 (Fails immediately if a disk error occurs).
     /// - **Execution:** Blocking; the calling thread waits for the file I/O to complete.
     pub fn direct_file(file: File) -> Logger {
-        Logger::new(DirectLogger::new(DefaultFileWriteService::new(file), 0))
+        Logger::new(DirectLogger::new(StandardFileWriteService::new(file), 0))
     }
 
     /// Creates an [asynchronous logger][`QueuedLogger`] that writes to a filesystem [`File`].
     ///
     /// **Configuration:**
-    /// - **Formatter:** Uses the [`DefaultMessageFormatter`][`crate::service::write::DefaultMessageFormatter`].
+    /// - **Formatter:** Uses the [`StandardMessageFormatter`][`crate::service::write::StandardMessageFormatter`].
     /// - **Retries:** 0.
     /// - **Workers:** 1 (A single background thread ensures log lines are written in the order they were called).
     /// - **Execution:** Non-blocking; logs are queued for the background worker.
     pub fn queued_file(file: File) -> Logger {
-        Logger::new(QueuedLogger::new(DefaultFileWriteService::new(file), 0, 1))
+        Logger::new(QueuedLogger::new(StandardFileWriteService::new(file), 0, 1))
     }
 
     /// Creates a [synchronous logger][`DirectLogger`] for a [`File`] using a [custom message formatter][`MessageFormatter`].
@@ -266,13 +266,13 @@ impl LoggerFactory {
     /// Creates a [synchronous logger][`DirectLogger`] that writes to a boxed [`std::io::Write`] trait object.
     ///
     /// **Configuration:**
-    /// - **Formatter:** [`DefaultMessageFormatter`][`crate::service::write::DefaultMessageFormatter`].
+    /// - **Formatter:** [`StandardMessageFormatter`][`crate::service::write::StandardMessageFormatter`].
     /// - **Retries:** 0.
     /// - **Execution:** Blocking; calls to the logger wait for the underlying [`Write`][`std::io::Write`]
     ///   implementation to return.
     pub fn direct_boxed_io(boxed_io: Box<dyn std::io::Write + Send + Sync>) -> Logger {
         Logger::new(DirectLogger::new(
-            DefaultBoxedIoWriteService::new(boxed_io),
+            StandardBoxedIoWriteService::new(boxed_io),
             0,
         ))
     }
@@ -280,13 +280,13 @@ impl LoggerFactory {
     /// Creates an [asynchronous logger][`QueuedLogger`] that writes to a boxed [`std::io::Write`] trait object.
     ///
     /// **Configuration:**
-    /// - **Formatter:** [`DefaultMessageFormatter`][`crate::service::write::DefaultMessageFormatter`].
+    /// - **Formatter:** [`StandardMessageFormatter`][`crate::service::write::StandardMessageFormatter`].
     /// - **Retries:** 0.
     /// - **Workers:** 1 (Ensures logs are written sequentially even if dispatched from multiple threads).
     /// - **Execution:** Non-blocking.
     pub fn queued_boxed_io(boxed_io: Box<dyn std::io::Write + Send + Sync>) -> Logger {
         Logger::new(QueuedLogger::new(
-            DefaultBoxedIoWriteService::new(boxed_io),
+            StandardBoxedIoWriteService::new(boxed_io),
             0,
             1,
         ))
@@ -341,23 +341,23 @@ impl LoggerFactory {
     /// Creates a [synchronous logger][`DirectLogger`] that appends log entries to an in-memory [`String`].
     ///
     /// **Configuration:**
-    /// - **Formatter:** [`DefaultMessageFormatter`][`crate::service::write::DefaultMessageFormatter`].
+    /// - **Formatter:** [`StandardMessageFormatter`][`crate::service::write::StandardMessageFormatter`].
     /// - **Retries:** 0.
     /// - **Execution:** Blocking; the [`String`] is modified immediately on the current thread.
     pub fn direct_string(string: String) -> Logger {
-        Logger::new(DirectLogger::new(DefaultStringWriteService::new(string), 0))
+        Logger::new(DirectLogger::new(StandardStringWriteService::new(string), 0))
     }
 
     /// Creates an [asynchronous logger][`QueuedLogger`] that appends log entries to an in-memory [`String`].
     ///
     /// **Configuration:**
-    /// - **Formatter:** [`DefaultMessageFormatter`][`crate::service::write::DefaultMessageFormatter`].
+    /// - **Formatter:** [`StandardMessageFormatter`][`crate::service::write::StandardMessageFormatter`].
     /// - **Retries:** 0.
     /// - **Workers:** 1 (Single background thread to ensure sequential string growth).
     /// - **Execution:** Non-blocking; the application continues while the worker appends to the buffer.
     pub fn queued_string(string: String) -> Logger {
         Logger::new(QueuedLogger::new(
-            DefaultStringWriteService::new(string),
+            StandardStringWriteService::new(string),
             0,
             1,
         ))
@@ -402,12 +402,12 @@ impl LoggerFactory {
     /// Creates a [synchronous logger][`DirectLogger`] that writes to a boxed [`std::fmt::Write`] trait object.
     ///
     /// **Configuration:**
-    /// - **Formatter:** [`DefaultMessageFormatter`][`crate::service::write::DefaultMessageFormatter`].
+    /// - **Formatter:** [`StandardMessageFormatter`][`crate::service::write::StandardMessageFormatter`].
     /// - **Retries:** 0 (Immediate failure if formatting fails).
     /// - **Execution:** Blocking; the caller waits for the string formatting to complete.
     pub fn direct_boxed_fmt(boxed_fmt: Box<dyn std::fmt::Write + Send + Sync>) -> Logger {
         Logger::new(DirectLogger::new(
-            DefaultBoxedFmtWriteService::new(boxed_fmt),
+            StandardBoxedFmtWriteService::new(boxed_fmt),
             0,
         ))
     }
@@ -415,13 +415,13 @@ impl LoggerFactory {
     /// Creates an [asynchronous logger][`QueuedLogger`] that writes to a boxed [`std::fmt::Write`] trait object.
     ///
     /// **Configuration:**
-    /// - **Formatter:** [`DefaultMessageFormatter`][`crate::service::write::DefaultMessageFormatter`].
+    /// - **Formatter:** [`StandardMessageFormatter`][`crate::service::write::StandardMessageFormatter`].
     /// - **Retries:** 0.
     /// - **Workers:** 1 (Ensures logs are formatted and written in call order).
     /// - **Execution:** Non-blocking; offloads string formatting to a background thread.
     pub fn queued_boxed_fmt(boxed_fmt: Box<dyn std::fmt::Write + Send + Sync>) -> Logger {
         Logger::new(QueuedLogger::new(
-            DefaultBoxedFmtWriteService::new(boxed_fmt),
+            StandardBoxedFmtWriteService::new(boxed_fmt),
             0,
             1,
         ))

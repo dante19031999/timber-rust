@@ -3,7 +3,7 @@
 
 use crate::service::ServiceError;
 use crate::service::fallback::Fallback;
-use crate::service::write::{DefaultMessageFormatter, MessageFormatter};
+use crate::service::write::{StandardMessageFormatter, MessageFormatter};
 use crate::{LoggerStatus, Message, Service};
 use std::any::Any;
 use std::sync::Mutex;
@@ -62,8 +62,8 @@ where
     /// ```
     /// # use timber_rust::{QueuedLogger, Logger};
     /// # use timber_rust::service::{FmtWriteService};
-    /// # use timber_rust::service::write::DefaultMessageFormatter;
-    /// let service = FmtWriteService::<String, DefaultMessageFormatter>::new(String::new());
+    /// # use timber_rust::service::write::StandardMessageFormatter;
+    /// let service = FmtWriteService::<String, StandardMessageFormatter>::new(String::new());
     /// let logger = QueuedLogger::new(service, 3, 4); // 3 retries, 4 worker threads
     /// let logger = Logger::new(logger);
     /// ```
@@ -85,9 +85,9 @@ where
     /// # Example
     /// ```
     /// # use timber_rust::{QueuedLogger, Logger};
-    /// # use timber_rust::service::write::DefaultMessageFormatter;
+    /// # use timber_rust::service::write::StandardMessageFormatter;
     /// # use timber_rust::service::FmtWriteService;
-    /// let service = FmtWriteService::<String, DefaultMessageFormatter>::new(String::new());
+    /// let service = FmtWriteService::<String, StandardMessageFormatter>::new(String::new());
     /// let logger = QueuedLogger::new(service, 3, 4); // 3 retries, 4 worker threads
     /// let logger = Logger::new(logger);
     /// ```
@@ -207,7 +207,7 @@ where
 #[allow(type_alias_bounds)]
 pub type StringService<F: MessageFormatter> = FmtService<String, F>;
 
-/// A [`StringWriteService`][`StringService`] pre-configured with the [`DefaultMessageFormatter`].
+/// A [`StringWriteService`][`StringService`] pre-configured with the [`StandardMessageFormatter`].
 ///
 /// This provides a zero-configuration path for in-memory string logging.
-pub type DefaultStringService = FmtService<String, DefaultMessageFormatter>;
+pub type StandardStringService = FmtService<String, StandardMessageFormatter>;
