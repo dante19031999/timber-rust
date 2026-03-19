@@ -24,7 +24,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 /// # Architecture
 /// 1. **Producer ([`log`][Self::log])**: Receives [`Message`] objects, timestamps them,
 ///    and pushes them into an internal MPSC (Multi-Producer, Single-Consumer) channel.
-/// 2. **Consumer ([`worker`][Self::worker])**: A dedicated background thread that
+/// 2. **Consumer (`worker`)**: A dedicated background thread that
 ///    drains the channel using a **greedy-drain** strategy, batching logs to
 ///    optimize network throughput to AWS.
 /// 3. **Service Layer**: Handles the actual communication with the CloudWatch API
