@@ -4,11 +4,9 @@
 use std::borrow::Cow;
 use std::io::Cursor;
 use std::sync::{Arc, Mutex};
-use timber_rust::service::{
-    ArcedFmtWriteService, AtemporalMessageFormatter, DefaultMessageFormatter, MessageFormatter,
-    StringWriteService,
-};
-use timber_rust::{QueuedLogger, LogLevel, Logger, MessageFactory, DirectLogger};
+use timber_rust::service::write::{AtemporalMessageFormatter, DefaultMessageFormatter};
+use timber_rust::service::{ArcedFmtWriteService, StringWriteService, WriteMessageFormatter};
+use timber_rust::{DirectLogger, LogLevel, Logger, MessageFactory, QueuedLogger};
 
 #[test]
 pub fn test_default_message_formatter() {
@@ -71,7 +69,8 @@ pub fn test_logger_level() {
 pub fn test_direct_logger() {
     let buffer = String::with_capacity(128);
     let formatter = AtemporalMessageFormatter {};
-    let service = StringWriteService::<AtemporalMessageFormatter>::new(buffer, formatter);
+    let service =
+        StringWriteService::<AtemporalMessageFormatter>::with_formatter(buffer, formatter);
     let logger_impl = DirectLogger::new(service, 0);
     let logger = Logger::new(logger_impl);
 
@@ -108,7 +107,7 @@ pub fn test_direct_logger() {
 pub fn test_queued_logger_1woker() {
     let buffer = Arc::new(Mutex::new(String::with_capacity(128)));
     let formatter = AtemporalMessageFormatter {};
-    let service = ArcedFmtWriteService::new(buffer.clone(), formatter);
+    let service = ArcedFmtWriteService::with_formatter(buffer.clone(), formatter);
     let logger_impl = QueuedLogger::new(service, 0, 1);
     let logger = Logger::new(logger_impl);
 
@@ -138,7 +137,7 @@ pub fn test_queued_logger_1woker() {
 pub fn test_queued_logger() {
     let buffer = Arc::new(Mutex::new(String::with_capacity(128)));
     let formatter = AtemporalMessageFormatter {};
-    let service = ArcedFmtWriteService::new(buffer.clone(), formatter);
+    let service = ArcedFmtWriteService::with_formatter(buffer.clone(), formatter);
     let logger_impl = QueuedLogger::new(service, 0, 4);
     let logger = Logger::new(logger_impl);
 

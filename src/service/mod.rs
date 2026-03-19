@@ -3,7 +3,6 @@
 
 mod error;
 mod fallback;
-mod formatter;
 mod fv1hash;
 pub(crate) mod serde;
 mod serror;
@@ -16,7 +15,6 @@ pub mod aws;
 
 pub use error::*;
 pub use fallback::*;
-pub use formatter::*;
 pub(crate) use fv1hash::*;
 
 #[cfg(feature = "serde_tools")]
@@ -25,12 +23,14 @@ pub use serde::BasicAuth;
 pub use serror::*;
 pub use service::*;
 
+pub use crate::service::write::MessageFormatter as WriteMessageFormatter;
+pub use crate::service::write::DefaultMessageFormatter as DefaultWriteMessageFormatter;
+
 pub use crate::service::write::BoxedIoService as BoxedIoWriteService;
 pub use crate::service::write::DefaultBoxedIoService as DefaultBoxedIoWriteService;
 pub use crate::service::write::DefaultFileWriteService as DefaultFileWriteService;
 pub use crate::service::write::FileWriteService as FileWriteService;
 pub use crate::service::write::IoService as IoWriteService;
-
 
 pub use crate::service::write::FmtService as FmtWriteService;
 pub use crate::service::write::StringService as StringWriteService;
@@ -62,9 +62,6 @@ pub use crate::service::loki::Service as LokiService;
 #[cfg(feature = "loki")]
 #[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
 pub use crate::service::loki::DefaultService as DefaultLokiService;
-#[cfg(feature = "loki")]
-#[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
-pub use crate::service::loki::Fallback as LokiFallback;
 
 #[cfg(feature = "aws")]
 #[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
