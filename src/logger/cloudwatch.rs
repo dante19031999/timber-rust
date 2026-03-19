@@ -14,9 +14,45 @@ use std::thread;
 use std::thread::JoinHandle;
 use std::time::{SystemTime, UNIX_EPOCH};
 
+/// A high-level, thread-safe logger implementation for AWS CloudWatch.
+///
+/// This structure acts as a bridge between the application's logging calls and the
+/// asynchronous AWS SDK. It implements a **producer-consumer pattern** using a
+/// dedicated background worker thread to ensure that logging operations do not
+/// block the main application execution.
+///
+/// # Architecture
+/// 1. **Producer ([`log`][Self::log])**: Receives [`Message`] objects, timestamps them,
+///    and pushes them into an internal MPSC (Multi-Producer, Single-Consumer) channel.
+/// 2. **Consumer ([`worker`][Self::worker])**: A dedicated background thread that
+///    drains the channel using a **greedy-drain** strategy, batching logs to
+///    optimize network throughput to AWS.
+/// 3. **Service Layer**: Handles the actual communication with the CloudWatch API
+///    via the internal Tokio runtime.
+///
+/// # Performance & Thread Safety
+/// - **Non-blocking**: The `log` method is essentially non-blocking, as it only
+///   performs a channel send operation.
+/// - **Graceful Shutdown**: Implements [`Drop`] to ensure that the channel is closed
+///   and all pending logs are flushed to AWS before the thread joins and the
+///   application terminates.
+///
+/// # Example
+/// ```rust
+/// use timber_rust::Logger;
+/// use timber_rust::service::CloudWatch;
+/// use timber_rust::service::aws::Config;
+///
+/// let config = Config::new("access", "secret", "my-group", "us-east-1");
+/// let logger = CloudWatch::new(config);
+/// let logger = Logger::new(logger);
+/// ```
 pub struct CloudWatch {
+    /// Handle to the background worker thread. Taken during [`Drop`].
     worker: Option<JoinHandle<()>>,
+    /// Sending end of the log pipeline. Dropped during [`Drop`] to signal shutdown.
     sender: Option<Sender<CloudWatchMessage>>,
+    /// Shared reference to the underlying CloudWatch service provider.
     service: Arc<dyn service::aws::CloudWatch + Send + Sync>,
 }
 
