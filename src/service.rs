@@ -49,19 +49,19 @@ pub use crate::service::write::StandardArcedFmtService as StandardArcedFmtWriteS
 
 #[cfg(feature = "loki")]
 #[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
+pub use crate::service::loki::Loki;
+#[cfg(feature = "loki")]
+#[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
+pub use crate::service::loki::StandardLoki;
+#[cfg(feature = "loki")]
+#[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
 pub use crate::service::loki::Config as LokiConfig;
 #[cfg(feature = "loki")]
 #[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
 pub use crate::service::loki::Data as LokiData;
 #[cfg(feature = "loki")]
 #[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
-pub use crate::service::loki::DefaultService as DefaultLokiService;
-#[cfg(feature = "loki")]
-#[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
 pub use crate::service::loki::Message as LokiMessage;
-#[cfg(feature = "loki")]
-#[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
-pub use crate::service::loki::Service as LokiService;
 
 #[cfg(feature = "aws")]
 #[cfg_attr(docsrs, doc(cfg(feature = "aws")))]

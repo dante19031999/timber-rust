@@ -106,7 +106,7 @@ The library uses two main logger models:
 - [`DirectLogger`]: A sync logger. Blocks until the process is finished.
 - [`QueuedLogger`]: An async logger. Uses a crossbeam internal queue to dispatch logs.
 - Both options use a [`Service`] as a backend. You may check or inbuilt [services][`service`]. You may build your own implementing the trait [`Service`][`crate::Service`].
-- [`LokiLogger`]: An specific batched logger to loki. Can be customized using a custom [`LokiService`][`crate::service::LokiService`].
+- [`LokiLogger`]: An specific batched logger to loki. Can be customized using a custom [`LokiService`][`crate::service::Loki`].
 - Don't forget to check first our inbuilt [`LoggerFactory`]!
 
 ### Mutltichanel logging

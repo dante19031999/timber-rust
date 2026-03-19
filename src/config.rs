@@ -137,7 +137,7 @@ pub enum ConfigEntry {
     /// This variant is only available when the `loki` feature is enabled.
     ///
     /// - See: [`LokiLogger`][`crate::logger::Loki`].
-    /// - See: [`LokiService`][`crate::service::LokiService`].
+    /// - See: [`LokiService`][`crate::service::Loki`].
     /// - See: [`LokiConfig`][`crate::service::LokiConfig`].
     /// - See:  [`DirectLogger`][`crate::DirectLogger`]
     /// - See:  [`QueuedLogger`][`crate::QueuedLogger`]

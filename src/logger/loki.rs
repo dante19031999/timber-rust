@@ -4,7 +4,7 @@
 #![cfg(feature = "loki")]
 #![cfg_attr(docsrs, doc(cfg(feature = "loki")))]
 
-use crate::service::{DefaultLokiService, LokiConfig, LokiData, LokiMessage, LokiService, ServiceError};
+use crate::service::{ LokiConfig, LokiData, LokiMessage,  ServiceError};
 use crate::{LoggerImpl, LoggerStatus, Message};
 use reqwest::blocking::{Client, RequestBuilder, Response};
 use std::any::Any;
@@ -14,6 +14,8 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::thread::JoinHandle;
 use std::time::{Duration, SystemTime};
+use crate::service::Loki as LokiService;
+use crate::service::StandardLoki as StandardLokiService;
 
 /// A persistent, asynchronous logger implementation for Grafana Loki.
 ///
@@ -40,11 +42,11 @@ pub struct Loki {
 }
 
 impl Loki {
-    /// Creates a new [`LokiLogger`][`Loki`] using the [`DefaultLokiService`].
+    /// Creates a new [`LokiLogger`][`Loki`] using the [`StandardLokiService`].
     ///
     /// This is a convenience wrapper around [`Self::with_service`].
     pub fn new(config: LokiConfig) -> Box<Loki> {
-        Self::with_service(config, Box::new(DefaultLokiService {}))
+        Self::with_service(config, Box::new(StandardLokiService {}))
     }
 
     /// Primary constructor that initializes the logger with a custom [`LokiService`].

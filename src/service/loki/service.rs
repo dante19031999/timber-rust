@@ -21,7 +21,7 @@ use std::time::UNIX_EPOCH;
 ///
 /// ### Required Hierarchy
 /// Must implement [`LokiFallback`][`Fallback`] to handle delivery failures.
-pub trait Service: Fallback {
+pub trait Loki: Fallback {
     /// Orchestrates the background worker loop.
     ///
     /// This method is the entry point for the worker thread. It implements a
@@ -170,8 +170,8 @@ pub trait Service: Fallback {
 
 /// The standard implementation of the Loki transport logic.
 ///
-/// [`DefaultLokiService`][`DefaultService`] provides the baseline behavior for the logging pipeline,
-/// using the standard batching and retry mechanisms defined in the [`LokiService`][`Service`]
+/// [`StandardLokiService`][`StandardLoki`] provides the baseline behavior for the logging pipeline,
+/// using the standard batching and retry mechanisms defined in the [`LokiService`][`Loki`]
 /// default trait methods.
 ///
 /// ### Behavior
@@ -181,11 +181,11 @@ pub trait Service: Fallback {
 ///
 /// This struct is stateless, acting primarily as a marker to satisfy the trait
 /// requirements of the [`LokiLogger`].
-pub struct DefaultService {}
+pub struct StandardLoki {}
 
-impl Service for DefaultService {}
+impl Loki for StandardLoki {}
 
-impl Fallback for DefaultService {
+impl Fallback for StandardLoki {
     /// Handles the ultimate delivery failure for a log message.
     ///
     /// This method is the "safety net" of the logging pipeline. It is invoked when

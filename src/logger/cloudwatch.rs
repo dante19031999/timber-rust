@@ -4,6 +4,7 @@
 #![cfg(feature = "aws")]
 #![cfg_attr(docsrs, doc(cfg(feature = "aws")))]
 
+use crate::service::CloudWatch as CloudWatchService;
 use crate::service::aws::{MessageFormatter, SimpleCloudWatch};
 use crate::service::{CloudWatchConfig, CloudWatchMessage, ServiceError};
 use crate::{LoggerImpl, LoggerStatus, Message, service};
@@ -53,7 +54,7 @@ pub struct CloudWatch {
     /// Sending end of the log pipeline. Dropped during [`Drop`] to signal shutdown.
     sender: Option<Sender<CloudWatchMessage>>,
     /// Shared reference to the underlying CloudWatch service provider.
-    service: Arc<dyn service::aws::CloudWatch + Send + Sync>,
+    service: Arc<dyn CloudWatchService + Send + Sync>,
 }
 
 impl CloudWatch {
@@ -86,10 +87,8 @@ impl CloudWatch {
         ))
     }
 
-    pub fn with_service(
-        service: Box<dyn service::aws::CloudWatch + Send + Sync>,
-    ) -> Box<CloudWatch> {
-        let service: Arc<dyn service::aws::CloudWatch + Send + Sync> = Arc::from(service);
+    pub fn with_service(service: Box<dyn CloudWatchService + Send + Sync>) -> Box<CloudWatch> {
+        let service: Arc<dyn CloudWatchService + Send + Sync> = Arc::from(service);
         let work_service = service.clone();
         let (sender, receiver) = std::sync::mpsc::channel::<CloudWatchMessage>();
 

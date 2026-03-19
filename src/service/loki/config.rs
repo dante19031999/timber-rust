@@ -62,7 +62,7 @@ pub struct Config {
 
 /// A network-based logging backend that pushes logs to Grafana Loki.
 ///
-/// [`LokiService`][`crate::service::LokiService`] transforms internal [`Message`][`crate::Message`] objects into Loki's
+/// [`LokiService`][`crate::service::Loki`] transforms internal [`Message`][`crate::Message`] objects into Loki's
 /// JSON "Push" format. It uses a blocking HTTP client, which is intended
 /// to be executed within a dedicated background worker thread to avoid
 /// blocking the main application.
