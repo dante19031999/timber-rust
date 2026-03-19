@@ -86,7 +86,7 @@ pub enum ConfigEntry {
     /// Logs are written directly to a file on disk. Each write is typically
     /// immediate, ensuring data integrity at the cost of higher I/O overhead.
     ///
-    /// - See: [`FileWriteService`][`crate::service::FileWriteService`].
+    /// - See: [`FileWriteService`][`crate::service::FileWrite`].
     /// - See:  [`DirectLogger`][`crate::DirectLogger`]
     /// - See:  [`QueuedLogger`][`crate::QueuedLogger`]
     File {
@@ -107,7 +107,7 @@ pub enum ConfigEntry {
     /// Logs are written directly to a file on disk. Each write is typically
     /// immediate, ensuring data integrity at the cost of higher I/O overhead.
     ///
-    /// - See: [`IoWriteService`][`crate::service::IoWriteService`].
+    /// - See: [`IoWriteService`][`crate::service::IoWrite`].
     /// - See: [`std::fs::File`]
     /// - See: [`std::io::BufWriter`]
     /// - See:  [`DirectLogger`][`crate::DirectLogger`]

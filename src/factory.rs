@@ -213,7 +213,7 @@ impl LoggerFactory {
     /// - **Retries:** 0 (Fails immediately if a disk error occurs).
     /// - **Execution:** Blocking; the calling thread waits for the file I/O to complete.
     pub fn direct_file(file: File) -> Logger {
-        Logger::new(DirectLogger::new(StandardFileWriteService::new(file), 0))
+        Logger::new(DirectLogger::new(StandardFileWrite::new(file), 0))
     }
 
     /// Creates an [asynchronous logger][`QueuedLogger`] that writes to a filesystem [`File`].
@@ -224,7 +224,7 @@ impl LoggerFactory {
     /// - **Workers:** 1 (A single background thread ensures log lines are written in the order they were called).
     /// - **Execution:** Non-blocking; logs are queued for the background worker.
     pub fn queued_file(file: File) -> Logger {
-        Logger::new(QueuedLogger::new(StandardFileWriteService::new(file), 0, 1))
+        Logger::new(QueuedLogger::new(StandardFileWrite::new(file), 0, 1))
     }
 
     /// Creates a [synchronous logger][`DirectLogger`] for a [`File`] using a [custom message formatter][`MessageFormatter`].
@@ -237,7 +237,7 @@ impl LoggerFactory {
         F: MessageFormatter + Send + Sync + 'static,
     {
         Logger::new(DirectLogger::new(
-            FileWriteService::<F>::with_formatter(file, formatter),
+            FileWrite::<F>::with_formatter(file, formatter),
             0,
         ))
     }
@@ -253,7 +253,7 @@ impl LoggerFactory {
         F: MessageFormatter + Send + Sync + 'static,
     {
         Logger::new(QueuedLogger::new(
-            FileWriteService::<F>::with_formatter(file, formatter),
+            FileWrite::<F>::with_formatter(file, formatter),
             0,
             1,
         ))
@@ -272,7 +272,7 @@ impl LoggerFactory {
     ///   implementation to return.
     pub fn direct_boxed_io(boxed_io: Box<dyn std::io::Write + Send + Sync>) -> Logger {
         Logger::new(DirectLogger::new(
-            StandardBoxedIoWriteService::new(boxed_io),
+            StandardBoxedIoWrite::new(boxed_io),
             0,
         ))
     }
@@ -286,7 +286,7 @@ impl LoggerFactory {
     /// - **Execution:** Non-blocking.
     pub fn queued_boxed_io(boxed_io: Box<dyn std::io::Write + Send + Sync>) -> Logger {
         Logger::new(QueuedLogger::new(
-            StandardBoxedIoWriteService::new(boxed_io),
+            StandardBoxedIoWrite::new(boxed_io),
             0,
             1,
         ))
@@ -305,7 +305,7 @@ impl LoggerFactory {
         F: MessageFormatter + Send + Sync + 'static,
     {
         Logger::new(DirectLogger::new(
-            BoxedIoWriteService::<F>::with_formatter(boxed_io, formatter),
+            BoxedIoWrite::<F>::with_formatter(boxed_io, formatter),
             0,
         ))
     }
@@ -324,7 +324,7 @@ impl LoggerFactory {
         F: MessageFormatter + Send + Sync + 'static,
     {
         Logger::new(QueuedLogger::new(
-            BoxedIoWriteService::<F>::with_formatter(boxed_io, formatter),
+            BoxedIoWrite::<F>::with_formatter(boxed_io, formatter),
             0,
             1,
         ))

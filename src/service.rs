@@ -26,11 +26,11 @@ pub use service::*;
 pub use crate::service::write::StandardMessageFormatter as StandardWriteMessageFormatter;
 pub use crate::service::write::MessageFormatter as WriteMessageFormatter;
 
-pub use crate::service::write::BoxedIoService as BoxedIoWriteService;
-pub use crate::service::write::StandardBoxedIoService as StandardBoxedIoWriteService;
-pub use crate::service::write::StandardFileWriteService;
-pub use crate::service::write::FileWriteService;
-pub use crate::service::write::IoService as IoWriteService;
+pub use crate::service::write::BoxedIo as BoxedIoWrite;
+pub use crate::service::write::StandardBoxedIo as StandardBoxedIoWrite;
+pub use crate::service::write::StandardFileWrite;
+pub use crate::service::write::FileWrite;
+pub use crate::service::write::Io as IoWrite;
 
 pub use crate::service::write::StandardStringService as StandardStringWriteService;
 pub use crate::service::write::FmtService as FmtWriteService;

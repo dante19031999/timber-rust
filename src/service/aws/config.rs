@@ -187,7 +187,7 @@ impl<'de> serde::Deserialize<'de> for Config {
             access_key_id: String,
             access_key_secret: String,
             session_token: Option<String>,
-            expires_in: Option<std::time::SystemTime>,
+            expires_in: Option<SystemTime>,
             log_group: String,
             region: String,
         }
@@ -197,7 +197,7 @@ impl<'de> serde::Deserialize<'de> for Config {
         Ok(Config {
             access_key_id: helper.access_key_id,
             access_key_secret: helper.access_key_secret,
-            session_token: None,
+            session_token: helper.session_token,
             expires_in: helper.expires_in,
             log_group: helper.log_group,
             region: helper.region,

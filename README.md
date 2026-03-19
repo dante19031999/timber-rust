@@ -72,7 +72,7 @@ logger.log((LogLevel::Info, "Hello world!"));
 # let _ = std::fs::remove_file("logs.txt");
 ```
 
-- See: [`DefaultFileWriteService`][`crate::service::StandardFileWriteService`]
+- See: [`DefaultFileWriteService`][`crate::service::StandardFileWrite`]
 
 ### Logging into loki
 

@@ -7,7 +7,7 @@
 use crate::service::CloudWatch as CloudWatchService;
 use crate::service::aws::{MessageFormatter, SimpleCloudWatch};
 use crate::service::{CloudWatchConfig, CloudWatchMessage, ServiceError};
-use crate::{LoggerImpl, LoggerStatus, Message, service};
+use crate::{LoggerImpl, LoggerStatus, Message};
 use std::any::Any;
 use std::sync::Arc;
 use std::sync::mpsc::Sender;
