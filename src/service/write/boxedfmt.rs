@@ -24,16 +24,16 @@ where
 ///
 /// ### Why this exists (The "Orphan Rule" Workaround)
 /// In Rust, [`std::fmt::Write`] is not implemented for `Box<dyn std::fmt::Write>`.
-/// While we could use a type alias for byte-based writers ([`BoxedFmtWriteService`][`BoxedFmtService`]),
+/// While we could use a type alias for byte-based writers ([`BoxedFmt`] service),
 /// doing so for string-based writers would require implementing a foreign trait on
 /// a foreign type, which is forbidden by Rust's "Orphan Rules."
 ///
-/// [`BoxedFmtWriteService`][`BoxedFmtService`] solves this by providing a concrete struct that "wraps"
+/// [`BoxedFmt`] service solves this by providing a concrete struct that "wraps"
 /// the boxed trait object, allowing us to manually dispatch the write calls in the
 /// [`work`](Self::work) method.
 ///
 ///
-pub struct BoxedFmtService<F>
+pub struct BoxedFmt<F>
 where
     F: MessageFormatter,
 {
@@ -41,11 +41,11 @@ where
     writer: Mutex<BoxedFmtServiceData<F>>,
 }
 
-impl<F> BoxedFmtService<F>
+impl<F> BoxedFmt<F>
 where
     F: MessageFormatter,
 {
-    /// Creates a new [`BoxedFmtWriteService`][`BoxedFmtService`] on the heap.
+    /// Creates a new [`BoxedFmt`] service on the heap.
     ///
     /// # Parameters
     /// - `writer`: A boxed trait object. This is useful when the exact type of
@@ -61,7 +61,7 @@ where
         })
     }
 
-    /// Creates a new [`BoxedFmtWriteService`][`BoxedFmtService`] on the heap with a custom [formatter][`MessageFormatter`].
+    /// Creates a new [`BoxedFmt`] service on the heap with a custom [formatter][`MessageFormatter`].
     ///
     /// # Parameters
     /// - `writer`: A boxed trait object. This is useful when the exact type of
@@ -103,7 +103,7 @@ where
     /// all recorded logs and free up the resources used by the [`Service`].
     ///
     /// ### Ownership & Lifecycle
-    /// This method consumes `self`, meaning the [`FmtWriteService`][`crate::service::write::FmtService`] can no longer be
+    /// This method consumes `self`, meaning the [`BoxedFmt`] service can no longer be
     /// used after this call. This is the only way to get full, non-cloned ownership
     /// of the internal writer (e.g., a [`String`] or [`Vec<u8>`]).
     ///
@@ -119,7 +119,7 @@ where
     }
 }
 
-impl<F> Service for BoxedFmtService<F>
+impl<F> Service for BoxedFmt<F>
 where
     F: MessageFormatter + 'static,
 {
@@ -157,7 +157,7 @@ where
     }
 }
 
-impl<F> Fallback for BoxedFmtService<F>
+impl<F> Fallback for BoxedFmt<F>
 where
     F: MessageFormatter + 'static,
 {
@@ -174,8 +174,8 @@ where
     }
 }
 
-/// A [`BoxedFmtWriteService`][`BoxedFmtService`] pre-configured with the [`StandardMessageFormatter`].
+/// A [`BoxedFmt`] service pre-configured with the [`StandardMessageFormatter`].
 ///
 /// This type is commonly used as a catch-all for string-based logging where
 /// maximum flexibility is required for the output destination.
-pub type StandardBoxedFmtService = BoxedFmtService<StandardMessageFormatter>;
+pub type StandardBoxedFmt = BoxedFmt<StandardMessageFormatter>;

@@ -345,7 +345,7 @@ impl LoggerFactory {
     /// - **Retries:** 0.
     /// - **Execution:** Blocking; the [`String`] is modified immediately on the current thread.
     pub fn direct_string(string: String) -> Logger {
-        Logger::new(DirectLogger::new(StandardStringWriteService::new(string), 0))
+        Logger::new(DirectLogger::new(StandardStringFmtWrite::new(string), 0))
     }
 
     /// Creates an [asynchronous logger][`QueuedLogger`] that appends log entries to an in-memory [`String`].
@@ -357,7 +357,7 @@ impl LoggerFactory {
     /// - **Execution:** Non-blocking; the application continues while the worker appends to the buffer.
     pub fn queued_string(string: String) -> Logger {
         Logger::new(QueuedLogger::new(
-            StandardStringWriteService::new(string),
+            StandardStringFmtWrite::new(string),
             0,
             1,
         ))
@@ -373,7 +373,7 @@ impl LoggerFactory {
         F: MessageFormatter + Send + Sync + 'static,
     {
         Logger::new(DirectLogger::new(
-            StringWriteService::<F>::with_formatter(string, formatter),
+            StringFmtWrite::<F>::with_formatter(string, formatter),
             0,
         ))
     }
@@ -389,7 +389,7 @@ impl LoggerFactory {
         F: MessageFormatter + Send + Sync + 'static,
     {
         Logger::new(QueuedLogger::new(
-            StringWriteService::<F>::with_formatter(string, formatter),
+            StringFmtWrite::<F>::with_formatter(string, formatter),
             0,
             1,
         ))
@@ -407,7 +407,7 @@ impl LoggerFactory {
     /// - **Execution:** Blocking; the caller waits for the string formatting to complete.
     pub fn direct_boxed_fmt(boxed_fmt: Box<dyn std::fmt::Write + Send + Sync>) -> Logger {
         Logger::new(DirectLogger::new(
-            StandardBoxedFmtWriteService::new(boxed_fmt),
+            StandardBoxedFmtWrite::new(boxed_fmt),
             0,
         ))
     }
@@ -421,7 +421,7 @@ impl LoggerFactory {
     /// - **Execution:** Non-blocking; offloads string formatting to a background thread.
     pub fn queued_boxed_fmt(boxed_fmt: Box<dyn std::fmt::Write + Send + Sync>) -> Logger {
         Logger::new(QueuedLogger::new(
-            StandardBoxedFmtWriteService::new(boxed_fmt),
+            StandardBoxedFmtWrite::new(boxed_fmt),
             0,
             1,
         ))
@@ -440,7 +440,7 @@ impl LoggerFactory {
         F: MessageFormatter + Send + Sync + 'static,
     {
         Logger::new(DirectLogger::new(
-            BoxedFmtWriteService::<F>::with_formatter(boxed_fmt, formatter),
+            BoxedFmtWrite::<F>::with_formatter(boxed_fmt, formatter),
             0,
         ))
     }
@@ -459,7 +459,7 @@ impl LoggerFactory {
         F: MessageFormatter + Send + Sync + 'static,
     {
         Logger::new(QueuedLogger::new(
-            BoxedFmtWriteService::<F>::with_formatter(boxed_fmt, formatter),
+            BoxedFmtWrite::<F>::with_formatter(boxed_fmt, formatter),
             0,
             1,
         ))

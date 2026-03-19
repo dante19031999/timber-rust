@@ -7,16 +7,13 @@ use crate::service::write::{StandardMessageFormatter, MessageFormatter};
 use crate::{LoggerStatus, Message, Service};
 use std::any::Any;
 use std::sync::Mutex;
-// =======================================================================
-// FmtWriteService
-// =======================================================================
 
-/// An internal wrapper for data protected by the [`FmtWriteService`][`FmtService`] mutex.
+/// An internal wrapper for data protected by the [`FmtWrite`] service mutex.
 ///
 /// This structure ensures that both the [`MessageFormatter`] and the [`std::fmt::Write`]
 /// destination are kept together, allowing them to be borrowed mutably as a single unit
 /// once the lock is acquired.
-struct FmtServiceData<W, F>
+struct FmtData<W, F>
 where
     W: std::fmt::Write + Send + Sync,
     F: MessageFormatter,
@@ -30,29 +27,29 @@ where
 
 /// A thread-safe logging [`Service`] for string-based output destinations.
 ///
-/// [`FmtWriteService`][`FmtService`] implements the [`Service`] trait for types that satisfy [`std::fmt::Write`].
+/// [`Fmt`] service implements the [`Service`] trait for types that satisfy [`std::fmt::Write`].
 /// It is ideal for in-memory logging, testing, or targets that do not use byte-oriented I/O.
 ///
 /// ### Thread Safety
-/// The internal `FmtWriteServiceData` is wrapped in a [`Mutex`]. This allows the [`Service`]
+/// The internal `FmtWriteData` is wrapped in a [`Mutex`]. This allows the [`Service`]
 /// to be shared across threads ([`Send`] + [`Sync`]), while ensuring that only one thread
 /// can perform a [`work`](Self::work) operation at a time.
-pub struct FmtService<W, F>
+pub struct Fmt<W, F>
 where
     W: std::fmt::Write + Send + Sync,
     F: MessageFormatter,
 {
     /// A mutex-protected container holding the writer and formatter.
     /// Access is managed via [`unlock_guard`].
-    writer: Mutex<FmtServiceData<W, F>>,
+    writer: Mutex<FmtData<W, F>>,
 }
 
-impl<W, F> FmtService<W, F>
+impl<W, F> Fmt<W, F>
 where
     W: std::fmt::Write + Send + Sync,
     F: MessageFormatter + Default,
 {
-    /// Creates a new, heap-allocated [`FmtWriteService`][`FmtService`][`FmtService`].
+    /// Creates a new, heap-allocated [`Fmt`] service.
     ///
     /// # Parameters
     /// - `writer`: An object implementing [`std::fmt::Write`].
@@ -61,22 +58,22 @@ where
     /// # Example
     /// ```
     /// # use timber_rust::{QueuedLogger, Logger};
-    /// # use timber_rust::service::{FmtWriteService};
+    /// # use timber_rust::service::FmtWrite;
     /// # use timber_rust::service::write::StandardMessageFormatter;
-    /// let service = FmtWriteService::<String, StandardMessageFormatter>::new(String::new());
+    /// let service = FmtWrite::<String, StandardMessageFormatter>::new(String::new());
     /// let logger = QueuedLogger::new(service, 3, 4); // 3 retries, 4 worker threads
     /// let logger = Logger::new(logger);
     /// ```
     pub fn new(writer: W) -> Box<Self> {
         Box::new(Self {
-            writer: Mutex::new(FmtServiceData {
+            writer: Mutex::new(FmtData {
                 writer,
                 formatter: F::default(),
             }),
         })
     }
 
-    /// Creates a new, heap-allocated [`FmtWriteService`][`FmtService`][`FmtService`] with a custom [formatter][`MessageFormatter`].
+    /// Creates a new, heap-allocated [`Fmt`] service with a custom [formatter][`MessageFormatter`].
     ///
     /// # Parameters
     /// - `writer`: An object implementing [`std::fmt::Write`].
@@ -86,14 +83,14 @@ where
     /// ```
     /// # use timber_rust::{QueuedLogger, Logger};
     /// # use timber_rust::service::write::StandardMessageFormatter;
-    /// # use timber_rust::service::FmtWriteService;
-    /// let service = FmtWriteService::<String, StandardMessageFormatter>::new(String::new());
+    /// # use timber_rust::service::FmtWrite;
+    /// let service = FmtWrite::<String, StandardMessageFormatter>::new(String::new());
     /// let logger = QueuedLogger::new(service, 3, 4); // 3 retries, 4 worker threads
     /// let logger = Logger::new(logger);
     /// ```
     pub fn with_formatter(writer: W, formatter: F) -> Box<Self> {
         Box::new(Self {
-            writer: Mutex::new(FmtServiceData { writer, formatter }),
+            writer: Mutex::new(FmtData { writer, formatter }),
         })
     }
 
@@ -120,7 +117,7 @@ where
     /// all recorded logs and free up the resources used by the [`Service`].
     ///
     /// ### Ownership & Lifecycle
-    /// This method consumes `self`, meaning the [`FmtWriteService`][`FmtService`] can no longer be
+    /// This method consumes `self`, meaning the [`Fmt`] service can no longer be
     /// used after this call. This is the only way to get full, non-cloned ownership
     /// of the internal writer (e.g., a [`String`] or [`Vec<u8>`]).
     ///
@@ -147,7 +144,7 @@ where
     }
 }
 
-impl<W, F> Service for FmtService<W, F>
+impl<W, F> Service for Fmt<W, F>
 where
     W: std::fmt::Write + Send + Sync + 'static,
     F: MessageFormatter + 'static,
@@ -168,7 +165,7 @@ where
     fn work(&self, msg: &Message) -> Result<(), ServiceError> {
         let mut guard = self.writer.lock()?;
         // Destructure the guard to get mutable access to fields
-        let FmtServiceData {
+        let FmtData {
             formatter, writer, ..
         } = &mut *guard;
         formatter.format_fmt(msg, writer)?;
@@ -180,7 +177,7 @@ where
         self
     }
 }
-impl<W, F> Fallback for FmtService<W, F>
+impl<W, F> Fallback for Fmt<W, F>
 where
     W: std::fmt::Write + Send + Sync + 'static,
     F: MessageFormatter + 'static,
@@ -205,9 +202,9 @@ where
 /// **Note:** Trait bounds on `F` are not enforced at definition time but are
 /// checked during instantiation.
 #[allow(type_alias_bounds)]
-pub type StringService<F: MessageFormatter> = FmtService<String, F>;
+pub type StringFmt<F: MessageFormatter> = Fmt<String, F>;
 
-/// A [`StringWriteService`][`StringService`] pre-configured with the [`StandardMessageFormatter`].
+/// A [`StringFmt`] service pre-configured with the [`StandardMessageFormatter`].
 ///
 /// This provides a zero-configuration path for in-memory string logging.
-pub type StandardStringService = FmtService<String, StandardMessageFormatter>;
+pub type StandardStringFmt = Fmt<String, StandardMessageFormatter>;

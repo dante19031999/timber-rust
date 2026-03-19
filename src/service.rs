@@ -32,20 +32,20 @@ pub use crate::service::write::StandardFileWrite;
 pub use crate::service::write::FileWrite;
 pub use crate::service::write::Io as IoWrite;
 
-pub use crate::service::write::StandardStringService as StandardStringWriteService;
-pub use crate::service::write::FmtService as FmtWriteService;
-pub use crate::service::write::StringService as StringWriteService;
+pub use crate::service::write::StandardStringFmt as StandardStringFmtWrite;
+pub use crate::service::write::Fmt as FmtWrite;
+pub use crate::service::write::StringFmt as StringFmtWrite;
 
 pub use crate::service::write::Cerr as CerrWrite;
 pub use crate::service::write::Cout as CoutWrite;
 pub use crate::service::write::StandardCerr as StandardCerrWrite;
 pub use crate::service::write::StandardCout as StandardCoutWrite;
 
-pub use crate::service::write::BoxedFmtService as BoxedFmtWriteService;
-pub use crate::service::write::StandardBoxedFmtService as StandardBoxedFmtWriteService;
+pub use crate::service::write::BoxedFmt as BoxedFmtWrite;
+pub use crate::service::write::StandardBoxedFmt as StandardBoxedFmtWrite;
 
-pub use crate::service::write::ArcedFmtService as ArcedFmtWriteService;
-pub use crate::service::write::StandardArcedFmtService as StandardArcedFmtWriteService;
+pub use crate::service::write::ArcedFmt as ArcedFmtWrite;
+pub use crate::service::write::StandardArcedFmt as StandardArcedFmtWrite;
 
 #[cfg(feature = "loki")]
 #[cfg_attr(docsrs, doc(cfg(feature = "loki")))]

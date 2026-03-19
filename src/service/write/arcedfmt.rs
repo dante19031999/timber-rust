@@ -31,13 +31,13 @@ where
 /// Using a type alias would require implementing a foreign trait on
 /// a foreign type, which is forbidden by Rust's "Orphan Rules."
 ///
-/// [`ArcedFmtWriteService`][`ArcedFmtService`] solves this by providing a concrete struct that "wraps"
+/// [`ArcedFmt`] service solves this by providing a concrete struct that "wraps"
 /// the shared trait object, allowing us to manually dispatch the write calls in the
 /// [`work`](Self::work) method.
 ///
 /// Not that this structure causes double lock. For the service and for the Arc.
 /// This was built for testing purposes, not for high performance.
-pub struct ArcedFmtService<F>
+pub struct ArcedFmt<F>
 where
     F: MessageFormatter,
 {
@@ -45,11 +45,11 @@ where
     writer: Mutex<ArcedFmtServiceData<F>>,
 }
 
-impl<F> ArcedFmtService<F>
+impl<F> ArcedFmt<F>
 where
     F: MessageFormatter,
 {
-    /// Creates a new [`ArcedFmtWriteService`][`ArcedFmtService`] on the heap.
+    /// Creates a new [`ArcedFmt`] service on the heap.
     ///
     /// # Parameters
     /// - `writer`: A shared trait object. This is useful when the exact type of
@@ -65,7 +65,7 @@ where
         })
     }
 
-    /// Creates a new [`ArcedFmtWriteService`][`ArcedFmtService`] on the heap with a custom [formatter][`MessageFormatter`].
+    /// Creates a new [`ArcedFmt`] service on the heap with a custom [formatter][`MessageFormatter`].
     ///
     /// # Parameters
     /// - `writer`: A shared trait object. This is useful when the exact type of
@@ -107,7 +107,7 @@ where
     /// all recorded logs and free up the resources used by the [`Service`].
     ///
     /// ### Ownership & Lifecycle
-    /// This method consumes `self`, meaning the [`FmtWriteService`][`crate::service::write::FmtService`] can no longer be
+    /// This method consumes `self`, meaning the [`ArcedFmt`] service can no longer be
     /// used after this call.
     ///
     /// ### Guarantees
@@ -129,7 +129,7 @@ where
     }
 }
 
-impl<F> Service for ArcedFmtService<F>
+impl<F> Service for ArcedFmt<F>
 where
     F: MessageFormatter + 'static,
 {
@@ -169,7 +169,7 @@ where
     }
 }
 
-impl<F> Fallback for ArcedFmtService<F>
+impl<F> Fallback for ArcedFmt<F>
 where
     F: MessageFormatter + 'static,
 {
@@ -186,8 +186,8 @@ where
     }
 }
 
-/// A [`ArcedFmtWriteService`][`ArcedFmtService`] pre-configured with the [`StandardMessageFormatter`].
+/// A [`ArcedFmt`] service pre-configured with the [`StandardMessageFormatter`].
 ///
 /// This type is commonly used as a catch-all for string-based logging where
 /// maximum flexibility is required for the output destination.
-pub type StandardArcedFmtService = ArcedFmtService<StandardMessageFormatter>;
+pub type StandardArcedFmt = ArcedFmt<StandardMessageFormatter>;

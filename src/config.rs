@@ -62,7 +62,7 @@ pub enum ConfigEntry {
     /// Standard Output (stdout).
     /// Logs are printed directly to the terminal's standard output stream.
     ///
-    /// - See: [`service::CoutWrite`][`crate::service::CoutWrite`]
+    /// - See: [`service::write::Cout`][`crate::service::write::Cout`]
     /// - See: [`logger::Direct`][`crate::logger::Direct`]
     /// - See: [`logger::Queued`][`crate::`logger::Queued`]
     StdOut {
@@ -74,7 +74,7 @@ pub enum ConfigEntry {
     /// Logs are printed to the terminal's standard error stream, typically
     /// used for diagnostics or errors.
     ///
-    /// - See: [`service::CerrWrite`][`crate::service::CerrWrite`].
+    /// - See: [`service::write::Cerr`][`crate::service::write::Cerr`].
     /// - See: [`logger::Direct`][`crate::logger::Direct`]
     /// - See: [`logger::Queued`][`crate::`logger::Queued`]
     StdErr {
@@ -86,7 +86,7 @@ pub enum ConfigEntry {
     /// Logs are written directly to a file on disk. Each write is typically
     /// immediate, ensuring data integrity at the cost of higher I/O overhead.
     ///
-    /// - See: [`service::FileWrite`][`crate::service::FileWrite`].
+    /// - See: [`service::write::File`][`crate::service::FileWrite`].
     /// - See: [`logger::Direct`][`crate::logger::Direct`]
     /// - See: [`logger::Queued`][`crate::`logger::Queued`]
     File {
@@ -107,7 +107,7 @@ pub enum ConfigEntry {
     /// Logs are written directly to a file on disk. Each write is typically
     /// immediate, ensuring data integrity at the cost of higher I/O overhead.
     ///
-    /// - See: [`IoWriteService`][`crate::service::IoWrite`].
+    /// - See: [`service::write::Io`][`crate::service::write::Io`].
     /// - See: [`std::fs::File`]
     /// - See: [`std::io::BufWriter`]
     /// - See: [`logger::Direct`][`crate::logger::Direct`]
@@ -123,7 +123,7 @@ pub enum ConfigEntry {
     /// Captures logs into an internal string buffer, useful for testing
     /// or displaying logs within an application UI.
     ///
-    /// - See: [`StringWriteService`][`crate::service::StringWriteService`].
+    /// - See: [`service::write::StringFmt`][`crate::service::write::StringFmt`].
     /// - See: [`logger::Direct`][`crate::logger::Direct`]
     /// - See: [`logger::Queued`][`crate::`logger::Queued`]
     String {
