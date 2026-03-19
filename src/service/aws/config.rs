@@ -47,6 +47,7 @@ impl Config {
     ///
     /// # Example
     /// ```rust
+    /// # use timber_rust::service::aws::Config;
     /// let config = Config::new("AKIA...", "secret", "my-logs", "us-east-1");
     /// ```
     pub fn new<S1, S2, S3, S4>(

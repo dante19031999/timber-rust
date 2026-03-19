@@ -68,6 +68,9 @@ pub use crate::service::loki::Message as LokiMessage;
 pub use crate::service::aws::CloudWatch;
 #[cfg(feature = "aws")]
 #[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
+pub use crate::service::aws::SimpleCloudWatch;
+#[cfg(feature = "aws")]
+#[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
 pub use crate::service::aws::Config as CloudWatchConfig;
 #[cfg(feature = "aws")]
 #[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
@@ -75,6 +78,3 @@ pub use crate::service::aws::Data as CloudWatchData;
 #[cfg(feature = "aws")]
 #[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
 pub use crate::service::aws::Message as CloudWatchMessage;
-#[cfg(feature = "aws")]
-#[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
-pub use crate::service::aws::SimpleCloudWatch;

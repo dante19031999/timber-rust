@@ -5,7 +5,7 @@
 #![cfg_attr(docsrs, doc(cfg(feature = "aws")))]
 
 use crate::logger::Status;
-use crate::service::aws::{Config, Data, DefaultMessageFormatter, MessageFormatter};
+use crate::service::aws::{Config, Data, StandardMessageFormatter, MessageFormatter};
 use crate::service::{CloudWatchMessage, ServiceError};
 use crate::{Fallback, Message};
 use aws_config::{BehaviorVersion, Region};
@@ -28,7 +28,7 @@ pub trait CloudWatch: Fallback + Sync + Send {
     fn work(&self, receiver: Receiver<CloudWatchMessage>);
 }
 
-/// Default implementation of the CloudWatch service using the AWS SDK.
+/// Standard implementation of the CloudWatch service using the AWS SDK.
 ///
 /// # Design Considerations
 /// AWS SDK for Rust is natively asynchronous. This implementation wraps the
@@ -50,7 +50,7 @@ pub struct SimpleCloudWatch {
 }
 
 impl SimpleCloudWatch {
-    /// Initializes a new `SimpleCloudWatch` service using the [`DefaultMessageFormatter`].
+    /// Initializes a new `SimpleCloudWatch` service using the [`StandardMessageFormatter`].
     ///
     /// This is a convenience wrapper around [`Self::new_formatted`]. It creates a
     /// multi-threaded Tokio runtime to manage the asynchronous AWS SDK
@@ -64,11 +64,13 @@ impl SimpleCloudWatch {
     ///
     /// # Example
     /// ```rust
+    /// # use timber_rust::service::aws::Config;
+    /// # use timber_rust::service::SimpleCloudWatch;
     /// let config = Config::new("access_key", "secret", "my-group", "us-east-1");
     /// let service = SimpleCloudWatch::new(config);
     /// ```
     pub fn new(config: Config) -> Box<dyn CloudWatch + Send + Sync> {
-        Self::new_formatted(config, DefaultMessageFormatter {})
+        Self::new_formatted(config, StandardMessageFormatter {})
     }
 
     /// Initializes a new `SimpleCloudWatch` service with a custom [`MessageFormatter`].
@@ -139,10 +141,11 @@ impl SimpleCloudWatch {
     /// # Example
     /// ```rust
     /// // Assumes AWS_REGION and credentials are set in the environment
-    /// let cw_service = DefaultCloudWatch::from_env("my-app-logs".to_string());
+    /// # use timber_rust::service::SimpleCloudWatch;
+    /// let cw_service = SimpleCloudWatch::from_env("my-app-logs".to_string());
     /// ```
     pub fn from_env(log_group: String) -> Box<dyn CloudWatch + Send + Sync> {
-        Self::from_env_formatted(log_group, DefaultMessageFormatter {})
+        Self::from_env_formatted(log_group, StandardMessageFormatter {})
     }
 
     pub fn from_env_formatted<F>(

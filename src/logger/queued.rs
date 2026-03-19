@@ -61,8 +61,8 @@ struct PerishableMessage {
 /// # use timber_rust::Message;
 /// # use timber_rust::MessageFactory;
 /// # use timber_rust::QueuedLogger;
-/// # use timber_rust::service::{StandardCoutWriteService};
-/// let service = StandardCoutWriteService::new();
+/// # use timber_rust::service::StandardCoutWrite;
+/// let service = StandardCoutWrite::new();
 /// let logger = QueuedLogger::new(service, 3, 4); // 3 retries, 4 worker threads
 /// let logger = Logger::new(logger);
 /// logger.log((LogLevel::Info,"System started"));

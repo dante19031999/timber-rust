@@ -41,7 +41,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 /// # Example
 /// ```rust
 /// use timber_rust::Logger;
-/// use timber_rust::service::CloudWatch;
+/// use timber_rust::logger::CloudWatch;
 /// use timber_rust::service::aws::Config;
 ///
 /// let config = Config::new("access", "secret", "my-group", "us-east-1");

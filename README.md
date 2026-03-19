@@ -87,7 +87,7 @@ let mut config = LokiConfig::new("localhost::3001");
 
 // An async batched loki logger
 # #[cfg(feature = "loki")]
-let logger = LoggerFactory::loki(file);
+let logger = LoggerFactory::loki(config);
 
 // Log something
 # #[cfg(feature = "loki")]

@@ -24,16 +24,16 @@ pub trait MessageFormatter: Send + Sync {
 ///   "msg": "Application started"
 /// }
 /// ```
-pub struct DefaultMessageFormatter {}
+pub struct StandardMessageFormatter {}
 
-impl DefaultMessageFormatter {
+impl StandardMessageFormatter {
     /// Creates a new instance of the default formatter.
     pub fn new() -> Self {
         Self {}
     }
 }
 
-impl MessageFormatter for DefaultMessageFormatter {
+impl MessageFormatter for StandardMessageFormatter {
     /// Converts the message into a JSON string containing the log level and content.
     ///
     /// The resulting string is what will be displayed in the "Message" column
