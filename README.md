@@ -108,6 +108,7 @@ The library uses two main logger models:
 - Both options use a [`Service`] as a backend. You may check or inbuilt [services][`service`]. You may build your own implementing the trait [`Service`][`crate::Service`].
 - [`LokiLogger`]: An specific batched logger to loki. Can be customized using a custom [`LokiService`][`crate::service::Loki`].
 - Don't forget to check first our inbuilt [`LoggerFactory`]!
+- You may directly implement [`LoggerImpl`] if you wish to bypass the [service][`service`] system.
 
 ### Mutltichanel logging
 
