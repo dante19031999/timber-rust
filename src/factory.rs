@@ -112,7 +112,7 @@ impl LoggerFactory {
     /// - **Execution:** Blocking; the caller waits for the write to finish.
     pub fn direct_cout() -> Logger {
         Logger::new(DirectLogger::new(
-            StandardCoutWriteService::new(),
+            StandardCoutWrite::new(),
             0, // <--- Retry count set to 0
         ))
     }
@@ -124,7 +124,7 @@ impl LoggerFactory {
     /// - **Workers:** 1 (Single background thread to maintain message order).
     pub fn queued_cout() -> Logger {
         Logger::new(QueuedLogger::new(
-            StandardCoutWriteService::new(),
+            StandardCoutWrite::new(),
             0, // <--- Retry count
             1, // <--- Worker count
         ))
@@ -138,7 +138,7 @@ impl LoggerFactory {
         F: MessageFormatter + Send + Sync + 'static,
     {
         Logger::new(DirectLogger::new(
-            CoutWriteService::with_formatter(formatter),
+            CoutWrite::with_formatter(formatter),
             0,
         ))
     }
@@ -151,7 +151,7 @@ impl LoggerFactory {
         F: MessageFormatter + Send + Sync + 'static,
     {
         Logger::new(QueuedLogger::new(
-            CoutWriteService::with_formatter(formatter),
+            CoutWrite::with_formatter(formatter),
             0,
             1,
         ))
@@ -161,14 +161,14 @@ impl LoggerFactory {
     ///
     /// **Hardcoded Config:** 0 retries.
     pub fn direct_cerr() -> Logger {
-        Logger::new(DirectLogger::new(StandardCerrWriteService::new(), 0))
+        Logger::new(DirectLogger::new(StandardCerrWrite::new(), 0))
     }
 
     /// Creates an [asynchronous logger][`QueuedLogger`] for `stderr`.
     ///
     /// **Hardcoded Config:** 0 retries, 1 background worker.
     pub fn queued_cerr() -> Logger {
-        Logger::new(QueuedLogger::new(StandardCerrWriteService::new(), 0, 1))
+        Logger::new(QueuedLogger::new(StandardCerrWrite::new(), 0, 1))
     }
 
     /// Creates a [synchronous logger][`DirectLogger`] for `stderr` with a [custom formatter][`MessageFormatter`].
@@ -179,7 +179,7 @@ impl LoggerFactory {
         F: MessageFormatter + Send + Sync + 'static,
     {
         Logger::new(DirectLogger::new(
-            CerrWriteService::with_formatter(formatter),
+            CerrWrite::with_formatter(formatter),
             0,
         ))
     }
@@ -192,7 +192,7 @@ impl LoggerFactory {
         F: MessageFormatter + Send + Sync + 'static,
     {
         Logger::new(QueuedLogger::new(
-            CerrWriteService::with_formatter(formatter),
+            CerrWrite::with_formatter(formatter),
             0,
             1,
         ))

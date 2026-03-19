@@ -42,7 +42,7 @@ pub trait CloudWatch: Fallback + Sync + Send {
 ///
 /// ### Alternatives
 /// If high-performance logging is required without the overhead of an internal runtime, consider:
-/// - Logging to [`stdout`][`crate::service::CoutWriteService`] and using the **CloudWatch Agent**.
+/// - Logging to [`stdout`][`crate::service::CoutWrite`] and using the **CloudWatch Agent**.
 /// - Using **AWS Lambda** integrated logging.
 pub struct SimpleCloudWatch {
     /// Service configuration

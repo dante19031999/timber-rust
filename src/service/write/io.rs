@@ -14,7 +14,7 @@ use std::sync::Mutex;
 /// **atomicity**: the formatter state and writer output are synchronized.
 /// By placing both in a single [`Mutex`], we guarantee that log interleaving
 /// is impossible even if the formatter holds internal state.
-struct IoServiceData<W, F>
+struct IoData<W, F>
 where
     W: std::io::Write + Send + Sync,
     F: MessageFormatter,
@@ -40,7 +40,7 @@ where
     F: MessageFormatter,
 {
     /// The mutex-protected destination and formatting logic.
-    writer: Mutex<IoServiceData<W, F>>,
+    writer: Mutex<IoData<W, F>>,
 }
 
 impl<W, F> Io<W, F>
@@ -55,7 +55,7 @@ where
     /// - `formatter`: The [`MessageFormatter`] implementation.
     pub fn new(writer: W) -> Box<Self> {
         Box::new(Self {
-            writer: Mutex::new(IoServiceData {
+            writer: Mutex::new(IoData {
                 writer,
                 formatter: Default::default(),
             }),
@@ -69,7 +69,7 @@ where
     /// - `formatter`: The [`MessageFormatter`] implementation.
     pub fn with_formatter(writer: W, formatter: F) -> Box<Self> {
         Box::new(Self {
-            writer: Mutex::new(IoServiceData { writer, formatter }),
+            writer: Mutex::new(IoData { writer, formatter }),
         })
     }
 }
@@ -92,7 +92,7 @@ where
         let mut guard = self.writer.lock()?;
 
         // Destructuring allows simultaneous mutable access to both fields.
-        let IoServiceData {
+        let IoData {
             formatter, writer, ..
         } = &mut *guard;
 
@@ -121,7 +121,7 @@ where
     }
 }
 
-/// A type alias for an [`IoWriteService`][`Io`] using a dynamic trait object.
+/// A type alias for an [`Io`] service using a dynamic trait object.
 ///
 /// This is particularly useful when you need to change the logging destination
 /// at runtime (e.g., switching from a File to a Network stream).
@@ -130,11 +130,11 @@ where
 #[allow(type_alias_bounds)]
 pub type BoxedIo<F: MessageFormatter> = Io<Box<dyn std::io::Write + Send + Sync>, F>;
 
-/// A type alias for an [`IoWriteService`][`Io`] writing specifically to a [`std::fs::File`].
+/// A type alias for an [`Io`] service writing specifically to a [`std::fs::File`].
 #[allow(type_alias_bounds)]
 pub type FileWrite<F: MessageFormatter> = Io<std::fs::File, F>;
 
-/// A pre-configured [`BoxedIoWriteService`][`BoxedIo`] using the crate's [`StandardMessageFormatter`].
+/// A pre-configured [`BoxedIo`] service using the crate's [`StandardMessageFormatter`].
 pub type StandardBoxedIo =
     Io<Box<dyn std::io::Write + Send + Sync>, StandardMessageFormatter>;
 

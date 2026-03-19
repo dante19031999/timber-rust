@@ -36,10 +36,10 @@ pub use crate::service::write::StandardStringService as StandardStringWriteServi
 pub use crate::service::write::FmtService as FmtWriteService;
 pub use crate::service::write::StringService as StringWriteService;
 
-pub use crate::service::write::CerrService as CerrWriteService;
-pub use crate::service::write::CoutService as CoutWriteService;
-pub use crate::service::write::StandardCerrService as StandardCerrWriteService;
-pub use crate::service::write::StandardCoutService as StandardCoutWriteService;
+pub use crate::service::write::Cerr as CerrWrite;
+pub use crate::service::write::Cout as CoutWrite;
+pub use crate::service::write::StandardCerr as StandardCerrWrite;
+pub use crate::service::write::StandardCout as StandardCoutWrite;
 
 pub use crate::service::write::BoxedFmtService as BoxedFmtWriteService;
 pub use crate::service::write::StandardBoxedFmtService as StandardBoxedFmtWriteService;

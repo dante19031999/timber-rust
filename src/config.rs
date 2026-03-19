@@ -62,9 +62,9 @@ pub enum ConfigEntry {
     /// Standard Output (stdout).
     /// Logs are printed directly to the terminal's standard output stream.
     ///
-    /// - See: [`CoutWriteService`][`crate::service::CoutWriteService`].
-    /// - See:  [`DirectLogger`][`crate::DirectLogger`]
-    /// - See:  [`QueuedLogger`][`crate::QueuedLogger`]
+    /// - See: [`service::CoutWrite`][`crate::service::CoutWrite`]
+    /// - See: [`logger::Direct`][`crate::logger::Direct`]
+    /// - See: [`logger::Queued`][`crate::`logger::Queued`]
     StdOut {
         /// The execution strategy: "sync" (blocking) or "async" (non-blocking).
         concurrency: Concurrency,
@@ -74,9 +74,9 @@ pub enum ConfigEntry {
     /// Logs are printed to the terminal's standard error stream, typically
     /// used for diagnostics or errors.
     ///
-    /// - See: [`CerrWriteService`][`crate::service::CerrWriteService`].
-    /// - See:  [`DirectLogger`][`crate::DirectLogger`]
-    /// - See:  [`QueuedLogger`][`crate::QueuedLogger`]
+    /// - See: [`service::CerrWrite`][`crate::service::CerrWrite`].
+    /// - See: [`logger::Direct`][`crate::logger::Direct`]
+    /// - See: [`logger::Queued`][`crate::`logger::Queued`]
     StdErr {
         /// The execution strategy: "sync" (blocking) or "async" (non-blocking).
         concurrency: Concurrency,
@@ -86,9 +86,9 @@ pub enum ConfigEntry {
     /// Logs are written directly to a file on disk. Each write is typically
     /// immediate, ensuring data integrity at the cost of higher I/O overhead.
     ///
-    /// - See: [`FileWriteService`][`crate::service::FileWrite`].
-    /// - See:  [`DirectLogger`][`crate::DirectLogger`]
-    /// - See:  [`QueuedLogger`][`crate::QueuedLogger`]
+    /// - See: [`service::FileWrite`][`crate::service::FileWrite`].
+    /// - See: [`logger::Direct`][`crate::logger::Direct`]
+    /// - See: [`logger::Queued`][`crate::`logger::Queued`]
     File {
         /// The execution strategy: "sync" (blocking) or "async" (non-blocking).
         concurrency: Concurrency,
@@ -110,8 +110,8 @@ pub enum ConfigEntry {
     /// - See: [`IoWriteService`][`crate::service::IoWrite`].
     /// - See: [`std::fs::File`]
     /// - See: [`std::io::BufWriter`]
-    /// - See:  [`DirectLogger`][`crate::DirectLogger`]
-    /// - See:  [`QueuedLogger`][`crate::QueuedLogger`]
+    /// - See: [`logger::Direct`][`crate::logger::Direct`]
+    /// - See: [`logger::Queued`][`crate::`logger::Queued`]
     BufferedFile {
         /// The execution strategy: "sync" (blocking) or "async" (non-blocking).
         concurrency: Concurrency,
@@ -124,8 +124,8 @@ pub enum ConfigEntry {
     /// or displaying logs within an application UI.
     ///
     /// - See: [`StringWriteService`][`crate::service::StringWriteService`].
-    /// - See:  [`DirectLogger`][`crate::DirectLogger`]
-    /// - See:  [`QueuedLogger`][`crate::QueuedLogger`]
+    /// - See: [`logger::Direct`][`crate::logger::Direct`]
+    /// - See: [`logger::Queued`][`crate::`logger::Queued`]
     String {
         /// The execution strategy: "sync" (blocking) or "async" (non-blocking).
         concurrency: Concurrency,
@@ -139,8 +139,8 @@ pub enum ConfigEntry {
     /// - See: [`LokiLogger`][`crate::logger::Loki`].
     /// - See: [`LokiService`][`crate::service::Loki`].
     /// - See: [`LokiConfig`][`crate::service::LokiConfig`].
-    /// - See:  [`DirectLogger`][`crate::DirectLogger`]
-    /// - See:  [`QueuedLogger`][`crate::QueuedLogger`]
+    /// - See: [`logger::Direct`][`crate::logger::Direct`]
+    /// - See: [`logger::Queued`][`crate::`logger::Queued`]
     #[cfg(feature = "loki")]
     #[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
     Loki {
@@ -156,8 +156,8 @@ pub enum ConfigEntry {
     /// - See: [`CloudwatchLogger`][`crate::logger::CloudWatch`].
     /// - See: [`CloudwatchService`][`crate::service::CloudWatch`].
     /// - See: [`CloudwatchConfig`][`crate::service::LokiConfig`].
-    /// - See:  [`DirectLogger`][`crate::DirectLogger`]
-    /// - See:  [`QueuedLogger`][`crate::QueuedLogger`]
+    /// - See: [`logger::Direct`][`crate::logger::Direct`]
+    /// - See: [`logger::Queued`][`crate::`logger::Queued`]
     #[cfg(feature = "aws")]
     #[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
     CloudWatchEnv {
@@ -173,8 +173,8 @@ pub enum ConfigEntry {
     /// - See: [`CloudwatchLogger`][`crate::logger::CloudWatch`].
     /// - See: [`CloudwatchService`][`crate::service::CloudWatch`].
     /// - See: [`CloudwatchConfig`][`crate::service::LokiConfig`].
-    /// - See:  [`DirectLogger`][`crate::DirectLogger`]
-    /// - See:  [`QueuedLogger`][`crate::QueuedLogger`]
+    /// - See: [`logger::Direct`][`crate::logger::Direct`]
+    /// - See: [`logger::Queued`][`crate::`logger::Queued`]
     #[cfg(feature = "aws")]
     #[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
     CloudWatchConfig {

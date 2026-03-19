@@ -13,7 +13,7 @@ use std::sync::Mutex;
 
 /// A logging [`Service`] that targets the standard output stream ([`std::io::stdout`]).
 ///
-/// Unlike other [`Service`]s, [`CoutWriteService`][`CoutService`] does not own its writer. Instead, it
+/// Unlike other [`Service`]s, [`Cout`] service does not own its writer. Instead, it
 /// acquires a handle to the global process `stdout` during every [`work`](Self::work) call.
 ///
 /// ### Why the Mutex?
@@ -21,7 +21,7 @@ use std::sync::Mutex;
 /// may hold internal state (like line counters or timing data) that is not thread-safe.
 /// Wrapping the formatter in a [`Mutex`] ensures that the formatting logic remains
 /// atomic and synchronized across threads.
-pub struct CoutService<F>
+pub struct Cout<F>
 where
     F: MessageFormatter,
 {
@@ -29,18 +29,18 @@ where
     formatter: Mutex<F>,
 }
 
-impl<F> CoutService<F>
+impl<F> Cout<F>
 where
     F: MessageFormatter,
 {
-    /// Creates a new [`CoutWriteService`][`CoutService`] on the heap.
+    /// Creates a new [`Cout`] service on the heap.
     pub fn new() -> Box<Self> {
         Box::new(Self {
             formatter: Mutex::new(Default::default()),
         })
     }
 
-    /// Creates a new [`CoutWriteService`][`CoutService`] on the heap  with a custom [formatter][`MessageFormatter`].
+    /// Creates a new [`Cout`] service on the heap  with a custom [formatter][`MessageFormatter`].
     pub fn with_formatter(formatter: F) -> Box<Self> {
         Box::new(Self {
             formatter: Mutex::new(formatter),
@@ -48,7 +48,7 @@ where
     }
 }
 
-impl<F> Service for CoutService<F>
+impl<F> Service for Cout<F>
 where
     F: MessageFormatter + 'static,
 {
@@ -76,7 +76,7 @@ where
     }
 }
 
-impl<F> Fallback for CoutService<F>
+impl<F> Fallback for Cout<F>
 where
     F: MessageFormatter + 'static,
 {
@@ -91,14 +91,14 @@ where
     }
 }
 
-/// A [`CoutWriteService`][`CoutService`] pre-configured with the [`StandardMessageFormatter`].
-pub type StandardCoutService = CoutService<StandardMessageFormatter>;
+/// A [`Cout`] service pre-configured with the [`StandardMessageFormatter`].
+pub type StandardCout = Cout<StandardMessageFormatter>;
 
 /// A logging [`Service`] that targets the standard error stream ([`std::io::stderr`]).
 ///
-/// [`CerrWriteService`][`CerrService`] is typically used for high-priority alerts or diagnostic
+/// [`Cerr`] service is typically used for high-priority alerts or diagnostic
 /// information that should remain visible even if `stdout` is redirected to a file.
-pub struct CerrService<F>
+pub struct Cerr<F>
 where
     F: MessageFormatter,
 {
@@ -106,18 +106,18 @@ where
     formatter: Mutex<F>,
 }
 
-impl<F> CerrService<F>
+impl<F> Cerr<F>
 where
     F: MessageFormatter,
 {
-    /// Creates a new [`CerrWriteService`][`CerrService`] on the heap.
+    /// Creates a new [`Cerr`] on the heap.
     pub fn new() -> Box<Self> {
         Box::new(Self {
             formatter: Mutex::new(Default::default()),
         })
     }
 
-    /// Creates a new [`CerrWriteService`][`CerrService`] on the heap with a custom [formatter][`MessageFormatter`].
+    /// Creates a new [`Cerr`] service on the heap with a custom [formatter][`MessageFormatter`].
     pub fn with_formatter(formatter: F) -> Box<Self> {
         Box::new(Self {
             formatter: Mutex::new(formatter),
@@ -125,7 +125,7 @@ where
     }
 }
 
-impl<F> Service for CerrService<F>
+impl<F> Service for Cerr<F>
 where
     F: MessageFormatter + 'static,
 {
@@ -149,7 +149,7 @@ where
     }
 }
 
-impl<F> Fallback for CerrService<F>
+impl<F> Fallback for Cerr<F>
 where
     F: MessageFormatter + 'static,
 {
@@ -164,5 +164,5 @@ where
     }
 }
 
-/// A [`CerrWriteService`][`CerrService`] pre-configured with the [`StandardMessageFormatter`].
-pub type StandardCerrService = CerrService<StandardMessageFormatter>;
+/// A [`Cerr`] service pre-configured with the [`StandardMessageFormatter`].
+pub type StandardCerr = Cerr<StandardMessageFormatter>;
