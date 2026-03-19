@@ -2,6 +2,8 @@
 // Copyright 2026 Dante Doménech Martinez dante19031999@gmail.com
 
 mod base;
+#[cfg(feature = "aws")]
+mod cloudwatch;
 mod direct;
 mod level;
 mod loggable;
@@ -18,6 +20,9 @@ pub use loggable::*;
 #[cfg(feature = "loki")]
 #[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
 pub use loki::*;
+#[cfg(feature = "aws")]
+#[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
+pub use cloudwatch::*;
 pub use queued::*;
 pub use silent::*;
 pub use status::*;
