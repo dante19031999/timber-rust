@@ -6,9 +6,9 @@
 
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
-use timber_rust::service::{
-    BasicAuth, DefaultLokiService, LokiConfig, LokiData,  LokiMessage, LokiService,
-};
+use timber_rust::service::Loki as LokiService;
+use timber_rust::service::StandardLoki as StandardLokiService;
+use timber_rust::service::{BasicAuth, LokiConfig, LokiData, LokiMessage};
 use timber_rust::{LoggerImpl, LoggerStatus, LokiLogger, MessageFactory};
 
 #[test]
@@ -80,7 +80,7 @@ pub fn test_loki_service() {
         post_url,
     });
 
-    let loki = DefaultLokiService {};
+    let loki = StandardLokiService {};
     let mut batch = vec![LokiMessage {
         message,
         timestamp: SystemTime::now(),
