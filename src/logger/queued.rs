@@ -139,6 +139,18 @@ impl Queued {
     pub fn get_service(&self) -> &dyn Service {
         self.service.as_ref()
     }
+
+    /// Consumes the logger and returns the underlying service.
+    ///
+    /// This method will **block** the current thread until all background workers
+    /// have finished processing the current queue and all retries have been
+    /// exhausted. This ensures that the returned service is in a clean,
+    /// idle state.
+    pub fn take_service(self) -> Arc<dyn Service + Send + Sync> {
+        // self is dropped here, triggering the Drop impl
+        // which joins all worker threads.
+        self.service.clone()
+    }
 }
 
 impl LoggerImpl for Queued {
