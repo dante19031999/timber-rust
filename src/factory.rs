@@ -9,6 +9,7 @@ use std::fs::File;
 use crate::CloudWatchLogger;
 #[cfg(feature = "loki")]
 use crate::LokiLogger;
+use crate::service::aws::CloudWatchCout;
 use crate::service::write::MessageFormatter;
 
 /// A centralized factory for constructing various [`Logger`] implementations.
@@ -137,10 +138,7 @@ impl LoggerFactory {
     where
         F: MessageFormatter + Send + Sync + 'static,
     {
-        Logger::new(DirectLogger::new(
-            CoutWrite::with_formatter(formatter),
-            0,
-        ))
+        Logger::new(DirectLogger::new(CoutWrite::with_formatter(formatter), 0))
     }
 
     /// Creates an [asynchronous logger][`QueuedLogger`] for `stdout` with a [custom formatter][`MessageFormatter`].
@@ -178,10 +176,7 @@ impl LoggerFactory {
     where
         F: MessageFormatter + Send + Sync + 'static,
     {
-        Logger::new(DirectLogger::new(
-            CerrWrite::with_formatter(formatter),
-            0,
-        ))
+        Logger::new(DirectLogger::new(CerrWrite::with_formatter(formatter), 0))
     }
 
     /// Creates an [asynchronous logger][`QueuedLogger`] for `stderr` with a [custom formatter][`MessageFormatter`].
@@ -271,10 +266,7 @@ impl LoggerFactory {
     /// - **Execution:** Blocking; calls to the logger wait for the underlying [`Write`][`std::io::Write`]
     ///   implementation to return.
     pub fn direct_boxed_io(boxed_io: Box<dyn std::io::Write + Send + Sync>) -> Logger {
-        Logger::new(DirectLogger::new(
-            StandardBoxedIoWrite::new(boxed_io),
-            0,
-        ))
+        Logger::new(DirectLogger::new(StandardBoxedIoWrite::new(boxed_io), 0))
     }
 
     /// Creates an [asynchronous logger][`QueuedLogger`] that writes to a boxed [`std::io::Write`] trait object.
@@ -285,11 +277,7 @@ impl LoggerFactory {
     /// - **Workers:** 1 (Ensures logs are written sequentially even if dispatched from multiple threads).
     /// - **Execution:** Non-blocking.
     pub fn queued_boxed_io(boxed_io: Box<dyn std::io::Write + Send + Sync>) -> Logger {
-        Logger::new(QueuedLogger::new(
-            StandardBoxedIoWrite::new(boxed_io),
-            0,
-            1,
-        ))
+        Logger::new(QueuedLogger::new(StandardBoxedIoWrite::new(boxed_io), 0, 1))
     }
 
     /// Creates a [synchronous logger][`DirectLogger`] for a boxed [`Write`][`std::io::Write`] object using a [custom formatter][`MessageFormatter`].
@@ -356,11 +344,7 @@ impl LoggerFactory {
     /// - **Workers:** 1 (Single background thread to ensure sequential string growth).
     /// - **Execution:** Non-blocking; the application continues while the worker appends to the buffer.
     pub fn queued_string(string: String) -> Logger {
-        Logger::new(QueuedLogger::new(
-            StandardStringFmtWrite::new(string),
-            0,
-            1,
-        ))
+        Logger::new(QueuedLogger::new(StandardStringFmtWrite::new(string), 0, 1))
     }
 
     /// Creates a [synchronous logger][`DirectLogger`] for a [`String`] buffer using a [custom formatter][`MessageFormatter`].
@@ -406,10 +390,7 @@ impl LoggerFactory {
     /// - **Retries:** 0 (Immediate failure if formatting fails).
     /// - **Execution:** Blocking; the caller waits for the string formatting to complete.
     pub fn direct_boxed_fmt(boxed_fmt: Box<dyn std::fmt::Write + Send + Sync>) -> Logger {
-        Logger::new(DirectLogger::new(
-            StandardBoxedFmtWrite::new(boxed_fmt),
-            0,
-        ))
+        Logger::new(DirectLogger::new(StandardBoxedFmtWrite::new(boxed_fmt), 0))
     }
 
     /// Creates an [asynchronous logger][`QueuedLogger`] that writes to a boxed [`std::fmt::Write`] trait object.
@@ -493,6 +474,7 @@ impl LoggerFactory {
     /// - if the underlying HTTP client (reqwest) cannot be initialized due to
     /// invalid system configuration or TLS issues.
     #[cfg(feature = "loki")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "loki")))]
     pub fn loki(config: LokiConfig) -> Logger {
         Logger::new(LokiLogger::new(config))
     }
@@ -519,6 +501,7 @@ impl LoggerFactory {
     /// - if the AWS client cannot be initialized due to
     /// invalid system configuration or TLS issues.
     #[cfg(feature = "aws")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
     pub fn cloudwatch_cfg(config: CloudWatchConfig) -> Logger {
         Logger::new(CloudWatchLogger::new(config))
     }
@@ -547,7 +530,41 @@ impl LoggerFactory {
     /// - if the AWS client cannot be initialized due to
     /// invalid system configuration or TLS issues.
     #[cfg(feature = "aws")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
     pub fn cloudwatch_env(log_group: String) -> Logger {
         Logger::new(CloudWatchLogger::from_env(log_group))
     }
-}
+
+    /// Creates a [synchronous logger][`DirectLogger`] for AWS CloudWatch via `stdout`.
+    ///
+    /// This logger uses the [`CloudWatchCoutMessageFormatter`] to transform log messages
+    /// into single-line JSON objects, making them compatible with CloudWatch Logs
+    /// subscription filters and insights.
+    ///
+    /// **Configuration:**
+    /// - **Format:** `{"level":"...","msg":"..."}`
+    /// - **Retries:** 3 (Attempts to re-write if the standard output stream is temporarily busy or interrupted).
+    /// - **Execution:** Blocking; ideal for Lambda functions where the runtime environment
+    ///   freezes the CPU after the main handler returns.
+    #[cfg(feature = "aws")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
+    pub fn direct_cloudwatch_cout() -> Logger {
+        Logger::new(DirectLogger::new(CloudWatchCout::new(), 3))
+    }
+
+    /// Creates an [asynchronous logger][`QueuedLogger`] for AWS CloudWatch via `stdout`.
+    ///
+    /// This logger is optimized for long-running containerized applications (ECS/Fargate)
+    /// where logging throughput is high and you want to minimize the impact on the
+    /// application's primary execution path.
+    ///
+    /// **Configuration:**
+    /// - **Format:** Single-line JSON.
+    /// - **Retries:** 3.
+    /// - **Workers:** 1 (Ensures logs remain in chronological order within the CloudWatch stream).
+    /// - **Execution:** Non-blocking; logs are offloaded to a background worker thread.
+    #[cfg(feature = "aws")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
+    pub fn queued_cloudwatch_cout() -> Logger {
+        Logger::new(QueuedLogger::new(CloudWatchCout::new(), 3, 1))
+    }}

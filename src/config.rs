@@ -182,6 +182,22 @@ pub enum ConfigEntry {
         config: CloudWatchConfig,
     },
 
+    /// AWS CloudWatch (via Standard Output).
+    ///
+    /// Formats logs as single-line JSON objects and prints them to `stdout`.
+    /// This is the preferred method for AWS Lambda, ECS (with `awslogs` driver),
+    /// and Fargate, as it avoids the overhead of the AWS SDK while maintaining
+    /// structured logs.
+    ///
+    /// - See: [`CloudWatchCout`][`crate::service::CloudWatchCout`].
+    /// - See: [`CloudWatchCoutMessageFormatter`][`crate::service::CloudWatchCoutMessageFormatter`].
+    /// - See: [`logger::Direct`][`crate::logger::Direct`]
+    /// - See: [`logger::Queued`][`crate::`logger::Queued`]
+    CloudWatchCout {
+        /// The execution strategy: "sync" (blocking) or "async" (non-blocking).
+        concurrency: Concurrency,
+    },
+
     /// Placeholder for missing functionality.
     /// Used when a configuration specifies a model (like `loki`) but the
     /// required crate feature was not enabled at compile time.
@@ -228,6 +244,7 @@ pub enum ConfigEntry {
 /// | `loki` | `config`: Object | Pushes logs to a Grafana Loki instance (Requires `loki` feature). |
 /// | `cloudwatch_cfg` | `config`: Object | Pushes logs to a AWS CloudWatch instance built from config (Requires `aws` feature). |
 /// | `cloudwatch_env` | `log_group`: String | Pushes logs to a AWS CloudWatch instance built from env (Requires `aws` feature). |
+/// | `cloudwatch_cout` | None | Pushes logs to standard cout for environments like AWS Lambda, ECS, or Fargate. |
 ///
 /// ---
 ///
@@ -382,6 +399,11 @@ impl Config {
                 ConfigEntry::CloudWatchEnv { log_group } => {
                     LoggerFactory::cloudwatch_env(log_group)
                 }
+                #[cfg(feature = "aws")]
+                ConfigEntry::CloudWatchCout { concurrency, .. } => match concurrency {
+                    Concurrency::Sync => LoggerFactory::direct_cloudwatch_cout(),
+                    Concurrency::Async => LoggerFactory::queued_cloudwatch_cout(),
+                },
                 ConfigEntry::DisabledFeature {
                     concurrency: _concurrency,
                     feature,
@@ -559,5 +581,18 @@ impl Config {
                 log_group: log_group.into(),
             },
         );
+    }
+
+    /// Adds a AWS Cloudwatch cout logger to the specified channel.
+    /// Only available when the `aws` feature is enabled.
+    ///
+    /// See: [`ConfigEntry::CloudWatchCout`]
+    #[cfg(feature = "aws")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "aws")))]
+    pub fn insert_entry_cloudwatch_cout<S>(&mut self, channel: S, concurrency: Concurrency)
+    where
+        S: Into<String>,
+    {
+        self.insert_entry(channel.into(), ConfigEntry::CloudWatchCout { concurrency });
     }
 }

@@ -38,6 +38,48 @@ use std::time::{SystemTime, UNIX_EPOCH};
 ///   and all pending logs are flushed to AWS before the thread joins and the
 ///   application terminates.
 ///
+/// # Alternative: CloudWatch via Standard Output (Cout)
+///
+/// While this [`CloudWatch`] implementation provides a robust, SDK-based integration
+/// with the AWS API, many modern AWS environments are optimized for "Log Driver"
+/// ingestion.
+///
+/// If your application runs in **AWS Lambda**, **ECS** (with the `awslogs` driver),
+/// or **Fargate**, you may prefer using the [`CloudWatchCout`][`crate::service::CloudWatchCout`] service.
+///
+/// ### Why use the `Cout` Alternative?
+/// * **Performance**: Writing to `stdout` is significantly faster than performing
+///   HTTPS requests, even with background workers. It avoids the CPU and memory
+///   overhead of the AWS SDK and TLS stack.
+/// * **Security**: You do not need to provide AWS IAM credentials (like Access Keys)
+///   to your application code. The execution environment (e.g., the Lambda Role)
+///   automatically handles the permissions for the captured stream.
+/// * **Resilience**: If the network is unstable, logs are buffered by the container
+///   runtime or orchestrator rather than occupying your application's heap memory.
+///
+/// ### Comparison
+/// | Feature          | SDK Logger ([`CloudWatch`][Self]) | Stdout Logger ([`CloudWatchCout`][crate::service::aws::CloudWatchCout]) |
+/// | :--------------- | :------------------------------- | :-------------------------------------------------------------------- |
+/// | **Transport** | HTTPS (AWS SDK)                  | Standard Output (`stdout`)                                            |
+/// | **Binary Size** | Larger (SDK + TLS)               | Minimal (No AWS dependencies)                                         |
+/// | **IAM Config** | Handled in-app                   | Handled by Execution Environment                                      |
+/// | **Best For** | On-premise, EC2, Legacy          | Lambda, ECS, Fargate, Kubernetes                                      |
+///
+/// ### Usage
+/// You can quickly initialize the alternative via the factory:
+/// ```rust
+/// use timber_rust::LoggerFactory;
+///
+/// // Direct (Sync) for Lambda
+/// let logger = LoggerFactory::direct_cloudwatch_cout();
+///
+/// // Queued (Async) for ECS/Fargate
+/// let logger = LoggerFactory::queued_cloudwatch_cout();
+/// ```
+///
+/// See also: [`CloudWatchCoutMessageFormatter`][crate::service::CloudWatchCoutMessageFormatter]
+/// for the JSON schema used by the alternative.
+///
 /// # Example
 /// ```rust
 /// use timber_rust::Logger;
