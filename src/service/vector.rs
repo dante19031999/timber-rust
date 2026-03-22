@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Dante Doménech Martinez dante19031999@gmail.com
 
-use crate::service::ServiceError;
+use crate::service::{ServiceError, StandardWriteMessageFormatter, WriteMessageFormatter};
 use crate::{Fallback, LoggerStatus, Message, Service};
 use std::any::Any;
 use std::sync::Mutex;
@@ -48,7 +48,7 @@ impl Vector {
     /// is still active.
     ///
     /// ### Returns
-    /// - [`Some(R)`]: The result of the closure `f`.
+    /// - [`Some(R)`][`Some`]: The result of the closure `f`.
     /// - [`None`]: If the internal lock was poisoned.
     pub fn inspect_vector<R>(&self, f: impl FnOnce(&Vec<VectorMessage>) -> R) -> Option<R> {
         self.logs.lock().ok().map(|r| f(&*r))
@@ -92,5 +92,15 @@ impl Service for Vector {
     }
 }
 
-/// Default fallback implementation.
-impl Fallback for Vector {}
+impl Fallback for Vector {
+    /// Attempts to log an error to `stdout` if the primary [`work`](Self::work) call fails.
+    ///
+    /// This method performs a best-effort write. If the mutex is locked by a hanging
+    /// thread, the fallback will be skipped to avoid a deadlock.
+    fn fallback(&self, error: &ServiceError, msg: &Message) {
+        let mut formatter = StandardWriteMessageFormatter::default();
+        let mut out = std::io::stdout();
+        let _ = formatter.format_io(msg, &mut out);
+        let _ = eprintln!("FmtWriteService Error: {}", error);
+    }
+}
