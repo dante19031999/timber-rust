@@ -33,6 +33,11 @@ impl Direct {
     pub fn get_service(&self) -> &dyn Service {
         self.service.as_ref()
     }
+
+    /// Takes the base service and destroys the logger implementation
+    pub fn take_service(self) -> Box<dyn Service + Send + Sync> {
+        self.service
+    }
 }
 
 impl LoggerImpl for Direct {
