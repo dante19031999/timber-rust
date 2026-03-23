@@ -1,13 +1,39 @@
-/*
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Dante Doménech Martinez dante19031999@gmail.com
 
+use std::any::Any;
 use std::borrow::Cow;
 use std::io::Cursor;
 use std::sync::{Arc, Mutex};
 use timber_rust::service::write::{AtemporalMessageFormatter, StandardMessageFormatter};
-use timber_rust::service::{ StringFmtWrite, WriteMessageFormatter};
-use timber_rust::{DirectLogger, LogLevel, Logger, MessageFactory, QueuedLogger};
+use timber_rust::service::{ServiceError, StringFmtWrite, WriteMessageFormatter};
+use timber_rust::{
+    DirectLogger, Fallback, LogLevel, Logger, LoggerStatus, Message, MessageFactory, QueuedLogger,
+    Service,
+};
+
+struct ArcedFmtWrite {
+    buffer: Arc<Mutex<String>>,
+}
+
+impl Service for ArcedFmtWrite {
+    fn status(&self) -> LoggerStatus {
+        LoggerStatus::Running
+    }
+
+    fn work(&self, msg: &Message) -> Result<(), ServiceError> {
+        let mut formatter = AtemporalMessageFormatter::default();
+        let mut guard = self.buffer.lock().map_err(|_| ServiceError::LockPoisoned)?;
+        formatter.format_fmt(msg, &mut *guard)?;
+        Ok(())
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
+
+impl Fallback for ArcedFmtWrite {}
 
 #[test]
 pub fn test_default_message_formatter() {
@@ -20,7 +46,7 @@ pub fn test_default_message_formatter() {
     // 2. Terminación en 'Z' o '+00:00'
     // 3. El nivel de log con sus espacios: [ DEBUG ]
     let iso_8601_regex = regex::Regex::new(
-        r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})\s+\[\s+DEBUG\s+\]\s+Test message"
+        r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})\s+\[\s+DEBUG\s+]\s+Test message"
     ).unwrap();
 
     // Usamos un Cursor sobre un Vec<u8> para simular un destino I/O
@@ -70,8 +96,7 @@ pub fn test_logger_level() {
 pub fn test_direct_logger() {
     let buffer = String::with_capacity(128);
     let formatter = AtemporalMessageFormatter {};
-    let service =
-        StringFmtWrite::<AtemporalMessageFormatter>::with_formatter(buffer, formatter);
+    let service = StringFmtWrite::<AtemporalMessageFormatter>::with_formatter(buffer, formatter);
     let logger_impl = DirectLogger::new(service, 0);
     let logger = Logger::new(logger_impl);
 
@@ -107,8 +132,9 @@ pub fn test_direct_logger() {
 #[test]
 pub fn test_queued_logger_1woker() {
     let buffer = Arc::new(Mutex::new(String::with_capacity(128)));
-    let formatter = AtemporalMessageFormatter {};
-    let service = ArcedFmtWrite::with_formatter(buffer.clone(), formatter);
+    let service = Box::new(ArcedFmtWrite {
+        buffer: buffer.clone(),
+    });
     let logger_impl = QueuedLogger::new(service, 0, 1);
     let logger = Logger::new(logger_impl);
 
@@ -137,8 +163,9 @@ pub fn test_queued_logger_1woker() {
 #[test]
 pub fn test_queued_logger() {
     let buffer = Arc::new(Mutex::new(String::with_capacity(128)));
-    let formatter = AtemporalMessageFormatter {};
-    let service = ArcedFmtWrite::with_formatter(buffer.clone(), formatter);
+    let service = Box::new(ArcedFmtWrite {
+        buffer: buffer.clone(),
+    });
     let logger_impl = QueuedLogger::new(service, 0, 4);
     let logger = Logger::new(logger_impl);
 
@@ -157,4 +184,3 @@ pub fn test_queued_logger() {
         assert!(string.contains(line.as_str()), "Log line not found");
     }
 }
-*/
