@@ -3,12 +3,13 @@
 
 use crate::service::ServiceError;
 use crate::service::fallback::Fallback;
-use crate::service::write::{StandardMessageFormatter, MessageFormatter};
+use crate::service::write::{MessageFormatter, StandardMessageFormatter};
 use crate::{LoggerStatus, Message, Service};
 use std::any::Any;
+use std::io::BufWriter;
 use std::sync::Mutex;
 
-/// A private synchronization container for [`Io`].
+/// A private synchronization container for [`IoWrite`].
 ///
 /// This struct groups the writer and formatter into a single unit. This ensures
 /// **atomicity**: the formatter state and writer output are synchronized.
@@ -27,14 +28,14 @@ where
 
 /// A thread-safe [`Service`] for byte-stream logging destinations.
 ///
-/// [`Io`] is the primary workhorse for file-based, socket-based, or
+/// [`IoWrite`] is the primary workhorse for file-based, socket-based, or
 /// console-based logging. It implements the [`Service`] trait by wrapping its
 /// internal data in a [`Mutex`].
 ///
 /// ### Performance Note
 /// This service does not explicitly call `flush()` after every write. If low-latency
 /// is required with guaranteed persistence, wrap your writer in [`std::io::BufWriter`].
-pub struct Io<W, F>
+pub struct IoWrite<W, F>
 where
     W: std::io::Write + Send + Sync,
     F: MessageFormatter,
@@ -43,12 +44,12 @@ where
     writer: Mutex<IoData<W, F>>,
 }
 
-impl<W, F> Io<W, F>
+impl<W, F> IoWrite<W, F>
 where
     W: std::io::Write + Send + Sync,
     F: MessageFormatter,
 {
-    /// Creates a new [`Io`] on the heap.
+    /// Creates a new [`IoWrite`] on the heap.
     ///
     /// # Parameters
     /// - `writer`: A type implementing [`std::io::Write`].
@@ -62,7 +63,7 @@ where
         })
     }
 
-    /// Creates a new [`Io`] on the heap with a custom [formatter][`MessageFormatter`].
+    /// Creates a new [`IoWrite`] on the heap with a custom [formatter][`MessageFormatter`].
     ///
     /// # Parameters
     /// - `writer`: A type implementing [`std::io::Write`].
@@ -74,7 +75,7 @@ where
     }
 }
 
-impl<W, F> Service for Io<W, F>
+impl<W, F> Service for IoWrite<W, F>
 where
     W: std::io::Write + Send + Sync + 'static,
     F: MessageFormatter + 'static,
@@ -105,7 +106,7 @@ where
     }
 }
 
-impl<W, F> Fallback for Io<W, F>
+impl<W, F> Fallback for IoWrite<W, F>
 where
     W: std::io::Write + Send + Sync + 'static,
     F: MessageFormatter + 'static,
@@ -121,22 +122,28 @@ where
     }
 }
 
-/// A type alias for an [`Io`] service using a dynamic trait object.
+/// A type alias for an [`IoWrite`] service using a dynamic trait object.
 ///
 /// This is particularly useful when you need to change the logging destination
 /// at runtime (e.g., switching from a File to a Network stream).
 ///
 /// **Bound Requirements:** The inner writer must be [`Send`] + [`Sync`] + `'static`.
 #[allow(type_alias_bounds)]
-pub type BoxedIo<F: MessageFormatter> = Io<Box<dyn std::io::Write + Send + Sync>, F>;
+pub type BoxedIo<F: MessageFormatter> = IoWrite<Box<dyn std::io::Write + Send + Sync>, F>;
 
-/// A type alias for an [`Io`] service writing specifically to a [`std::fs::File`].
+/// A type alias for an [`IoWrite`] service writing specifically to a [`std::fs::File`].
 #[allow(type_alias_bounds)]
-pub type FileWrite<F: MessageFormatter> = Io<std::fs::File, F>;
+pub type File<F: MessageFormatter> = IoWrite<std::fs::File, F>;
+
+/// A type alias for an [`IoWrite`] service writing specifically to a [`std::io::BufWriter<std::fs::File>`][`BufWriter`].
+#[allow(type_alias_bounds)]
+pub type BufferedFile<F: MessageFormatter> = IoWrite<BufWriter<std::fs::File>, F>;
 
 /// A pre-configured [`BoxedIo`] service using the crate's [`StandardMessageFormatter`].
-pub type StandardBoxedIo =
-    Io<Box<dyn std::io::Write + Send + Sync>, StandardMessageFormatter>;
+pub type StandardBoxedIo = BoxedIo<StandardMessageFormatter>;
 
-/// A pre-configured [`FileWrite`] using the crate's [`StandardMessageFormatter`].
-pub type StandardFileWrite = Io<std::fs::File, StandardMessageFormatter>;
+/// A pre-configured [`File`] using the crate's [`StandardMessageFormatter`].
+pub type StandardFile = File<StandardMessageFormatter>;
+
+/// A pre-configured [`BufferedFile`] using the crate's [`StandardMessageFormatter`].
+pub type StandardBufferedFile = BufferedFile<StandardMessageFormatter>;

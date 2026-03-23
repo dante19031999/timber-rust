@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Dante Doménech Martinez dante19031999@gmail.com
 
-#![cfg(feature = "aws")]
-#![cfg_attr(docsrs, doc(cfg(feature = "aws")))]
+#![cfg(feature = "awscout")]
+#![cfg_attr(docsrs, doc(cfg(feature = "awscout")))]
 
 use crate::Message;
 use crate::service::write::MessageFormatter;

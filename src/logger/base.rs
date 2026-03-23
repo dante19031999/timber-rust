@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Dante Doménech Martinez dante19031999@gmail.com
 
-use crate::{LoggerStatus, Message};
 use crate::logger::loggable::Loggable;
+use crate::{LoggerStatus, Message};
 use std::any::Any;
 use std::sync::Arc;
 
@@ -102,4 +102,13 @@ impl Logger {
         &*self.m_impl
     }
 
+    /// Destroys the logger and returns the underlying [LoggerImpl].
+    ///
+    /// Another logger may be using this implementation elsewhere.
+    ///
+    /// This is useful for accessing backend-specific methods or performing
+    /// downcasts via [Any].
+    pub fn take_implementation(self) -> Arc<dyn LoggerImpl> {
+        self.m_impl
+    }
 }

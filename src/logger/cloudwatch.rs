@@ -69,12 +69,13 @@ use std::time::{SystemTime, UNIX_EPOCH};
 /// You can quickly initialize the alternative via the factory:
 /// ```rust
 /// use timber_rust::LoggerFactory;
+/// use timber_rust::Concurrency;
 ///
 /// // Direct (Sync) for Lambda
-/// let logger = LoggerFactory::direct_cloudwatch_cout();
+/// let logger = LoggerFactory::cloudwatch().cout().build(Concurrency::Sync);
 ///
 /// // Queued (Async) for ECS/Fargate
-/// let logger = LoggerFactory::queued_cloudwatch_cout();
+/// let logger = LoggerFactory::cloudwatch().cout().build(Concurrency::Async);
 /// ```
 ///
 /// See also: [`CloudWatchCoutMessageFormatter`][crate::service::CloudWatchCoutMessageFormatter]

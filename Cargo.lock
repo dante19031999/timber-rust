@@ -2012,6 +2012,7 @@ dependencies = [
  "aws-sdk-cloudwatchlogs",
  "chrono",
  "crossbeam",
+ "log",
  "regex",
  "reqwest",
  "serde",

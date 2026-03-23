@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Dante Doménech Martinez dante19031999@gmail.com
 
-use crate::service::FeatureDisabledError;
+use crate::service::serror::FeatureDisabledError;
 #[cfg(feature = "network")]
 use crate::service::HttpError;
 use std::fmt::{Display, Formatter};

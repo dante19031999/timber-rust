@@ -8,8 +8,8 @@ use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 use timber_rust::service::Loki as LokiService;
 use timber_rust::service::StandardLoki as StandardLokiService;
-use timber_rust::service::{BasicAuth, LokiConfig, LokiData, LokiMessage};
-use timber_rust::{LoggerImpl, LoggerStatus, LokiLogger, MessageFactory};
+use timber_rust::service::{LokiConfig, LokiData, LokiMessage};
+use timber_rust::{BasicAuth, LoggerImpl, LoggerStatus, LokiLogger, MessageFactory};
 
 #[test]
 fn test_loki_config_full_builder() {
@@ -27,7 +27,7 @@ fn test_loki_config_full_builder() {
         .connection_timeout(Duration::from_secs(10))
         .request_timeout(Duration::from_secs(60))
         .max_retries(5)
-        .workers(4);
+        .worker_count(4);
 
     // Verificaciones
     assert_eq!(config.get_url(), "http://loki:3100/");
@@ -37,14 +37,14 @@ fn test_loki_config_full_builder() {
 
     // Verificamos el Option de BasicAuth
     let auth_res = config.get_basic_auth().unwrap();
-    assert_eq!(auth_res.username(), "admin");
-    assert_eq!(auth_res.password().unwrap(), "secret");
+    assert_eq!(&auth_res.username, "admin");
+    assert_eq!(&auth_res.password.clone().unwrap(), "secret");
 
     assert_eq!(config.get_bearer_auth().unwrap(), "token123");
     assert_eq!(config.get_connection_timeout(), Duration::from_secs(10));
     assert_eq!(config.get_request_timeout(), Duration::from_secs(60));
     assert_eq!(config.get_max_retries(), 5);
-    assert_eq!(config.get_workers(), 4);
+    assert_eq!(config.get_worker_count(), 4);
 
     config = LokiConfig::with_labels("http://loki:3100", "my-service", "backend", "staging");
 

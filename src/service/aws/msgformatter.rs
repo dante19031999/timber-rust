@@ -1,5 +1,12 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright 2026 Dante Doménech Martinez dante19031999@gmail.com
+
+#![cfg(feature = "awscout")]
+#![cfg_attr(docsrs, doc(cfg(feature = "awscout")))]
+
 use crate::Message;
 use serde_json::json;
+
 
 /// Defines a strategy for converting a log message into a string format
 /// compatible with CloudWatch Logs.
@@ -44,5 +51,11 @@ impl MessageFormatter for StandardMessageFormatter {
             "msg": message.content().to_string(),
         })
         .to_string()
+    }
+}
+
+impl Default for StandardMessageFormatter {
+    fn default() -> Self {
+        Self{}
     }
 }

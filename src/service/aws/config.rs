@@ -4,7 +4,6 @@
 #![cfg(feature = "aws")]
 #![cfg_attr(docsrs, doc(cfg(feature = "aws")))]
 
-use serde::ser::SerializeStruct;
 use std::time::SystemTime;
 
 /// Configuration for the AWS CloudWatch service.
@@ -18,19 +17,19 @@ use std::time::SystemTime;
 #[derive(Clone)]
 pub struct Config {
     /// AWS Access Key ID used for authentication.
-    access_key_id: String,
+    pub(crate) access_key_id: String,
     /// AWS Secret Access Key. This field is sensitive and hidden in Debug logs.
-    access_key_secret: String,
+    pub(crate) access_key_secret: String,
     /// Optional session token for temporary credentials (STS).
-    session_token: Option<String>,
+    pub(crate) session_token: Option<String>,
     /// Optional expiration timestamp for the credentials in seconds.
-    expires_in: Option<SystemTime>,
+    pub(crate) expires_in: Option<SystemTime>,
     /// The name of the CloudWatch Log Group where logs will be sent.
-    log_group: String,
+    pub(crate) log_group: String,
     /// The AWS Region (e.g., "us-east-1").
-    region: String,
+    pub(crate) region: String,
     /// Identifier for the provider or application generating the logs.
-    provider: &'static str,
+    pub(crate) provider: &'static str,
 }
 
 impl Config {
@@ -175,50 +174,5 @@ impl std::fmt::Debug for Config {
         }
 
         d.finish()
-    }
-}
-
-impl<'de> serde::Deserialize<'de> for Config {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        #[derive(serde::Deserialize)]
-        struct ShadowConfig {
-            access_key_id: String,
-            access_key_secret: String,
-            session_token: Option<String>,
-            expires_in: Option<SystemTime>,
-            log_group: String,
-            region: String,
-        }
-
-        let helper = ShadowConfig::deserialize(deserializer)?;
-
-        Ok(Config {
-            access_key_id: helper.access_key_id,
-            access_key_secret: helper.access_key_secret,
-            session_token: helper.session_token,
-            expires_in: helper.expires_in,
-            log_group: helper.log_group,
-            region: helper.region,
-            provider: "timber-rust",
-        })
-    }
-}
-
-impl serde::Serialize for Config {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        let mut state = serializer.serialize_struct("CloudWatchConfig", 10)?;
-        state.serialize_field("access_key_id", &self.access_key_id)?;
-        state.serialize_field("access_key_secret", &self.access_key_secret)?;
-        state.serialize_field("session_token", &self.session_token)?;
-        state.serialize_field("expires_in", &self.expires_in)?;
-        state.serialize_field("log_group", &self.log_group)?;
-        state.serialize_field("region", &self.region)?;
-        state.end()
     }
 }

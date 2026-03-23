@@ -283,18 +283,9 @@ impl CloudWatch for SimpleCloudWatch {
 }
 
 impl Fallback for SimpleCloudWatch {
-    fn fallback(&self, error: &ServiceError, msg: &Message) {
+    fn fallback(&self, _error: &ServiceError, msg: &Message) {
         let now: chrono::DateTime<Utc> = msg.instant().into();
         let now = now.to_rfc3339_opts(SecondsFormat::Nanos, true);
-
-        match error {
-            ServiceError::Http(e) => {
-                eprintln!("Cloudwatch rejected log: Status {}", e.status_code())
-            }
-            ServiceError::Network(e) => eprintln!("Cloudwatch network error: {}", e),
-            _ => eprintln!("Cloudwatch service failure: {}", error),
-        }
-
         println!("{} [{}] | {}", now, msg.level(), msg.content());
     }
 }

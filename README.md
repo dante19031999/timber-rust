@@ -16,6 +16,27 @@ and type-safety, allowing developers to switch between different observability b
 - **Secure by Default:** Automatic vulnerability scanning and license compliance.
 - **Docs-First:** Comprehensive API documentation integrated with [GitHub Pages](https://dante19031999.github.io/timber-rust/timber_rust/index.html).
 
+### Available loggers
+- Silent: [`logger::Silent`][crate::logger::Silent] (the messages are dropped)
+- Direct (sync logging): [`logger::Direct`][crate::logger::Direct] (uses services)
+- Queued (async logging): [`logger::Queued`][crate::logger::Queued] (uses services)
+- Loki (batched HTTPS): [`logger::Loki`][crate::logger::Loki] (requires feature `loki`)
+- CloudWatch (batched HTTPS): [`logger::CloudWatch`][crate::logger::CloudWatch] (requires feature `aws`)
+
+### Available services
+- Loki (HTTPS): [`service::Loki`][crate::service::Loki] (requires feature `loki`)
+- ClousWatch (SDK): [`service::CloudWatch`][crate::service::CloudWatch] (requires feature `aws`)
+- ClousWatch (STDOUT): [`service::CloudWatchCout`][crate::service::CloudWatchCout] (requires feature `awscout`)
+- Io services: [`service::IoWrite`][crate::service::IoWrite]
+  - File: [`service::StandardFileWrite`][crate::service::StandardFileWrite]
+  - Buffered file: [`service::StandardBufferedFileWrite`][crate::service::StandardBufferedFileWrite]
+  - Boxed writers: [`service::StandardBoxedIoWrite`][crate::service::StandardBoxedIoWrite]
+- Fmt services: [`service::FmtWrite`][crate::service::FmtWrite]
+  - String: [`service::StandardStringFmtWrite`][crate::service::StandardStringFmtWrite]
+  - Boxed writers: [`service::StandardBoxedFmtWrite`][crate::service::StandardBoxedFmtWrite]
+- Conceptual:
+  - Vector: [`service::Vector`][crate::service::Vector]
+
 ## 📖 Documentation
 
 Full technical documentation, including API references and module usage, is available at our GitHub Pages site.
@@ -36,10 +57,11 @@ timber-rust = { git = "[https://github.com/dante19031999/timber-rust](https://gi
 ```rust
 use timber_rust::LoggerFactory;
 use timber_rust::LogLevel;
+use timber_rust::Concurrency;
 
 // An async logger over stdout/stderr (1 worker)
-let logger_stdout = LoggerFactory::queued_cout();
-let logger_stderr = LoggerFactory::queued_cerr();
+let logger_stdout = LoggerFactory::cout().build(Concurrency::Async);
+let logger_stderr = LoggerFactory::cerr().build(Concurrency::Sync);
 
 // Log something
 logger_stdout.log(("INFO", "Hello world!"));
@@ -54,6 +76,7 @@ logger_stderr.log((LogLevel::Info, "Hello world!"));
 ```rust
 use timber_rust::LoggerFactory;
 use timber_rust::LogLevel;
+use timber_rust::Concurrency;
 use std::fs::OpenOptions;
 
 let mut file = OpenOptions::new()
@@ -63,7 +86,7 @@ let mut file = OpenOptions::new()
     .open("logs.txt").expect("Could not open file!");
 
 // An async logger over a file (1 worker)
-let logger = LoggerFactory::queued_file(file);
+let logger = LoggerFactory::io().file(file).build(Concurrency::Async);
 
 // Log something
 logger.log(("INFO", "Hello world!"));
@@ -79,7 +102,9 @@ logger.log((LogLevel::Info, "Hello world!"));
 ```rust
 # #[cfg(feature = "loki")]
 use timber_rust::service::LokiConfig;
+# #[cfg(feature = "loki")]
 use timber_rust::LoggerFactory;
+# #[cfg(feature = "loki")]
 use timber_rust::LogLevel;
 
 # #[cfg(feature = "loki")]
@@ -87,14 +112,13 @@ let mut config = LokiConfig::new("localhost::3001");
 
 // An async batched loki logger
 # #[cfg(feature = "loki")]
-let logger = LoggerFactory::loki(config);
+let logger = LoggerFactory::loki().config(config).build();
 
 // Log something
 # #[cfg(feature = "loki")]
 logger.log(("INFO", "Hello world!"));
 # #[cfg(feature = "loki")]
 logger.log((LogLevel::Info, "Hello world!"));
-
 ```
 
 - See: [`LokiLogger`]

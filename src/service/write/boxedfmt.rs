@@ -110,7 +110,7 @@ where
     /// ### Guarantees
     /// Because this takes ownership of the [`Service`], it is compile-time guaranteed
     /// that no other threads can be writing to the buffer when this is called.
-    pub fn recover_writer(self) -> Result<Box<dyn std::fmt::Write + Send + Sync>, ServiceError> {
+    pub fn take_writer(self) -> Result<Box<dyn std::fmt::Write + Send + Sync>, ServiceError> {
         let data = self.writer.into_inner();
         match data {
             Ok(data) => Ok(data.writer),

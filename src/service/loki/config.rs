@@ -4,10 +4,8 @@
 #![cfg(feature = "loki")]
 #![cfg_attr(docsrs, doc(cfg(feature = "loki")))]
 
-use crate::service::serde::{BasicAuth, FlexibleDuration};
-use serde::ser::{Serialize, SerializeStruct, Serializer};
-use serde::{Deserialize, Deserializer};
 use std::time::Duration;
+use crate::BasicAuth;
 
 /// Default app for loki streams.
 pub const LOKI_DEFAULT_APP: &str = "rust-app";
@@ -33,15 +31,15 @@ pub const LOKI_DEFAULT_REQUEST_TIMEOUT: Duration = Duration::from_secs(2);
 ///
 /// ### Example
 /// ```rust
-/// # use timber_rust::Logger;
+/// # use timber_rust::{BasicAuth, Logger};
 /// # use timber_rust::service::{LokiConfig};
 /// # use timber_rust::LokiLogger;
 /// let config = LokiConfig::new("[https://logs-prod-us-central1.grafana.net/loki/api/v1/push](https://logs-prod-us-central1.grafana.net/loki/api/v1/push)")
 ///     .job("api-server")
 ///     .app("billing-v2")
 ///     .env("prod")
-///     .basic_auth(Some(("12345", Some("your-api-key"))))
-///     .workers(4);
+///     .basic_auth(BasicAuth::some("12345", Some("your-api-key")))
+///     .worker_count(4);
 ///
 /// let logger = LokiLogger::new(config);
 /// let logger = Logger::new(logger);
@@ -57,7 +55,7 @@ pub struct Config {
     pub(crate) connection_timeout: Duration,
     pub(crate) request_timeout: Duration,
     pub(crate) max_retries: usize,
-    pub(crate) workers: usize,
+    pub(crate) worker_count: usize,
 }
 
 /// A network-based logging backend that pushes logs to Grafana Loki.
@@ -81,7 +79,7 @@ pub struct Config {
 ///
 /// ### Logger data:
 /// - `max_retries`: Maximum number of retries (only used in the [`LoggerFactory`][`crate::LoggerFactory`])
-/// - `workers`: Number of workers to use (only used in the [`LoggerFactory`][`crate::LoggerFactory`])
+/// - `worker_count`: Number of workers to use (only used in the [`LoggerFactory`][`crate::LoggerFactory`])
 impl Config {
     /// Creates a new [`LokiConfig`][`Config`] with default settings.
     ///
@@ -144,7 +142,7 @@ impl Config {
             connection_timeout: LOKI_DEFAULT_CONNECTION_TIMEOUT,
             request_timeout: LOKI_DEFAULT_REQUEST_TIMEOUT,
             max_retries: LOKI_DEFAULT_RETRIES,
-            workers: LOKI_DEFAULT_WORKERS,
+            worker_count: LOKI_DEFAULT_WORKERS,
         }
     }
 
@@ -189,8 +187,8 @@ impl Config {
     }
 
     /// Returns the number of background worker threads requested for this service.
-    pub fn get_workers(&self) -> usize {
-        self.workers
+    pub fn get_worker_count(&self) -> usize {
+        self.worker_count
     }
 
     /// Returns the maximum number of teries allowed for this service.
@@ -227,8 +225,8 @@ impl Config {
     }
 
     /// Configures the number of parallel workers that should process logs for this service.
-    pub fn workers(mut self, workers: usize) -> Self {
-        self.workers = workers;
+    pub fn worker_count(mut self, worker_count: usize) -> Self {
+        self.worker_count = worker_count;
         self
     }
 
@@ -303,94 +301,9 @@ impl std::fmt::Debug for Config {
         d.field("connection_timeout", &self.connection_timeout)
             .field("request_timeout", &self.request_timeout)
             .field("max_retries", &self.max_retries)
-            .field("workers", &self.workers)
+            .field("worker_count", &self.worker_count)
             .finish()
     }
 }
 
-impl Serialize for Config {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        // Count your fields: we have 10 top-level keys
-        let mut state = serializer.serialize_struct("LokiConfig", 10)?;
 
-        state.serialize_field("url", &self.url)?;
-        state.serialize_field("app", &self.app)?;
-        state.serialize_field("job", &self.job)?;
-        state.serialize_field("env", &self.env)?;
-
-        if let Some(basic_auth) = &self.basic_auth {
-            state.serialize_field("basic_auth", &basic_auth)?;
-        }
-
-        if let Some(bearer_auth) = &self.bearer_auth {
-            state.serialize_field("bearer_auth", bearer_auth)?;
-        }
-
-        // Connect Timeout
-        state.serialize_field(
-            "connection_timeout",
-            &FlexibleDuration::from_duration(self.connection_timeout),
-        )?;
-
-        // Request Timeout
-        state.serialize_field(
-            "request_timeout",
-            &FlexibleDuration::from_duration(self.connection_timeout),
-        )?;
-
-        state.serialize_field("max_retries", &self.max_retries)?;
-        state.serialize_field("workers", &self.workers)?;
-
-        state.end()
-    }
-}
-
-impl<'de> Deserialize<'de> for Config {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        #[derive(serde::Deserialize)]
-        struct LokiConfigHelper {
-            url: String,
-            app: Option<String>,
-            job: Option<String>,
-            env: Option<String>,
-            basic_auth: Option<BasicAuth>,
-            bearer_auth: Option<String>,
-            connection_timeout: Option<FlexibleDuration>,
-            request_timeout: Option<FlexibleDuration>,
-            max_retries: Option<usize>,
-            workers: Option<usize>,
-        }
-
-        let mut data = LokiConfigHelper::deserialize(deserializer)?;
-
-        // Fix url
-        if !data.url.ends_with('/') {
-            data.url.push('/');
-        }
-
-        Ok(Config {
-            url: data.url,
-            app: data.app.unwrap_or(LOKI_DEFAULT_APP.to_string()),
-            job: data.job.unwrap_or(LOKI_DEFAULT_JOB.to_string()),
-            env: data.env.unwrap_or(LOKI_DEFAULT_ENV.to_string()),
-            basic_auth: data.basic_auth,
-            bearer_auth: data.bearer_auth,
-            connection_timeout: data
-                .connection_timeout
-                .map(|timeout| timeout.as_duration())
-                .unwrap_or(Ok(LOKI_DEFAULT_CONNECTION_TIMEOUT))?,
-            request_timeout: data
-                .request_timeout
-                .map(|timeout| timeout.as_duration())
-                .unwrap_or(Ok(LOKI_DEFAULT_REQUEST_TIMEOUT))?,
-            workers: data.workers.unwrap_or(LOKI_DEFAULT_WORKERS),
-            max_retries: data.max_retries.unwrap_or(LOKI_DEFAULT_RETRIES),
-        })
-    }
-}
