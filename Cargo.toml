@@ -1,6 +1,6 @@
 [package]
 name = "timber_rust"
-version = "2.0.1"
+version = "2.0.2"
 edition = "2024"
 license = "Apache-2.0"
 authors = ["Dante Doménech Martinez <dante19031999@gmail.com>"]
