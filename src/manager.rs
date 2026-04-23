@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Dante Doménech Martinez dante19031999@gmail.com
 
-use crate::service::FvnBuildHasher;
-use crate::{logger::Loggable, Logger, LoggerFactory};
+use crate::{Logger, LoggerFactory, logger::Loggable};
+use fnv64_rs::FnvBuildHasher;
 use std::collections::HashMap;
 
 /// [`LogManager`] acts as a registry and dispatcher for multiple logging channels.
@@ -18,7 +18,7 @@ use std::collections::HashMap;
 pub struct LogManager {
     default_logger: Logger,
     /// Uses a non-cryptographic FVN hasher for O(1) lookups on channel names.
-    channel_loggers: HashMap<String, Logger, FvnBuildHasher>,
+    channel_loggers: HashMap<String, Logger, FnvBuildHasher>,
 }
 
 impl LogManager {

@@ -5,7 +5,6 @@
 pub mod aws;
 mod error;
 mod fallback;
-mod fv1hash;
 #[cfg(feature = "loki")]
 pub mod loki;
 mod serror;
@@ -15,7 +14,6 @@ pub mod write;
 
 pub use error::*;
 pub use fallback::*;
-pub(crate) use fv1hash::*;
 
 pub use serror::*;
 pub use service::*;

@@ -1,13 +1,14 @@
 use crate::config::entry::Entry;
-use crate::service::{FeatureDisabledError, FvnBuildHasher, ServiceError};
+use crate::service::{FeatureDisabledError,  ServiceError};
 use crate::{LogManager, LoggerFactory};
 use std::collections::HashMap;
 use std::fs::{File, OpenOptions};
 use std::io::BufWriter;
 use std::path::Path;
+use fnv64_rs::FnvBuildHasher;
 
 pub struct Config {
-    entries: HashMap<String, Entry, FvnBuildHasher>,
+    entries: HashMap<String, Entry, FnvBuildHasher>,
 }
 
 impl Config {
